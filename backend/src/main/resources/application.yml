@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: seatly
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/seatly
+    username: seatly
+    password: seatly
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+logging:
+  level:
+    org.hibernate.SQL: debug
