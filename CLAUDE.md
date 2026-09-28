@@ -223,7 +223,10 @@ so `"   "` does not sneak past a `@NotBlank` check.
 copy. Keeps display text out of the backend and leaves translation open.
 
 **Auditable base entity.** `@MappedSuperclass` with `createdAt`/`updatedAt`,
-filled by Spring Data auditing. Every entity extends it.
+filled by Spring Data auditing. Every entity extends it — except a pure
+lookup table with no independent lifecycle worth tracking (e.g. `Tag`), which
+is a plain `@Entity` instead. Auditing existing is the default; skipping it
+is the exception, made deliberately per table, not a loophole to reach for.
 
 **Soft delete.** `is_deleted` flag. Every query filters on it. Nothing is ever
 physically removed.
@@ -399,7 +402,11 @@ everything — frontend validation is UX, never a security boundary.
 Six tables. Flyway owns the schema entirely; Hibernate runs `ddl-auto: validate`
 and only checks entities match. Never switch that to `update`.
 
-### user
+### app_user
+
+Named `app_user`, not `user` — `USER` is a reserved word in PostgreSQL (it
+backs `CURRENT_USER`), and a table literally named `user` would need
+double-quoting in every migration, JPA mapping, and raw query forever.
 
 | Column                  | Type         | Notes            |
 | ----------------------- | ------------ | ---------------- |
@@ -417,7 +424,7 @@ and only checks entities match. Never switch that to `update`.
 | Column                  | Type         | Notes                                        |
 | ----------------------- | ------------ | -------------------------------------------- |
 | id                      | BIGINT       | PK                                           |
-| organizer_id            | BIGINT       | FK → user.id                                 |
+| organizer_id            | BIGINT       | FK → app_user.id                             |
 | name                    | VARCHAR(255) | not null                                     |
 | description             | TEXT         | not null                                     |
 | mode                    | VARCHAR(20)  | ONLINE \| PHYSICAL                           |
@@ -435,7 +442,7 @@ and only checks entities match. Never switch that to `update`.
 | Column                  | Type        | Notes                                |
 | ----------------------- | ----------- | ------------------------------------ |
 | id                      | BIGINT      | PK                                   |
-| user_id                 | BIGINT      | FK → user.id                         |
+| user_id                 | BIGINT      | FK → app_user.id                     |
 | event_id                | BIGINT      | FK → event.id                        |
 | status                  | VARCHAR(20) | CONFIRMED \| WAITLISTED \| CANCELLED |
 | position                | INT         | nullable, set only when WAITLISTED   |
