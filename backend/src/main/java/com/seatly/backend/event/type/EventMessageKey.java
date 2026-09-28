@@ -27,7 +27,8 @@ public enum EventMessageKey implements MessageKey {
     MEETING_LINK_TOO_LONG(EventMessageKeys.MEETING_LINK_TOO_LONG),
     DATE_REQUIRED(EventMessageKeys.DATE_REQUIRED),
     SEAT_LIMIT_REQUIRED(EventMessageKeys.SEAT_LIMIT_REQUIRED),
-    SEAT_LIMIT_MIN(EventMessageKeys.SEAT_LIMIT_MIN);
+    SEAT_LIMIT_MIN(EventMessageKeys.SEAT_LIMIT_MIN),
+    TAG_IDS_REQUIRED(EventMessageKeys.TAG_IDS_REQUIRED);
 
     private final String key;
 

@@ -40,7 +40,7 @@ public class Event extends Auditable {
     @JoinColumn(name = "organizer_id", nullable = false)
     private User organizer;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = EventFieldLimits.NAME_MAX_LENGTH)
     private String name;
 
     @Column(name = "description", nullable = false)
@@ -52,10 +52,10 @@ public class Event extends Auditable {
     @Column(name = "mode", nullable = false, length = 20)
     private EventMode mode;
 
-    @Column(name = "location")
+    @Column(name = "location", length = EventFieldLimits.LOCATION_MAX_LENGTH)
     private String location;
 
-    @Column(name = "meeting_link", length = 500)
+    @Column(name = "meeting_link", length = EventFieldLimits.MEETING_LINK_MAX_LENGTH)
     private String meetingLink;
 
     @Column(name = "event_date", nullable = false)
