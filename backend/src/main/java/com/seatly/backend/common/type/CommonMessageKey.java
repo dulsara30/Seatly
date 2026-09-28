@@ -7,6 +7,7 @@ package com.seatly.backend.common.type;
  */
 public enum CommonMessageKey implements MessageKey {
 
+    VALIDATION_FAILED,
     ACCESS_DENIED,
     DATA_INTEGRITY_VIOLATION,
     INTERNAL_SERVER_ERROR;

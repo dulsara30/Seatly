@@ -18,10 +18,19 @@ public record ResponseEntityDto<T>(ResponseStatusType status, List<T> results) {
         return new ResponseEntityDto<>(ResponseStatusType.UNSUCCESSFUL, List.of(new ErrorMessage(messageKey.getKey())));
     }
 
-    public static ResponseEntityDto<ErrorMessage> error(List<String> messages) {
-        return new ResponseEntityDto<>(ResponseStatusType.UNSUCCESSFUL, messages.stream().map(ErrorMessage::new).toList());
+    public static ResponseEntityDto<FieldValidationError> validationError(List<FieldValidationError> errors) {
+        return new ResponseEntityDto<>(ResponseStatusType.UNSUCCESSFUL, errors);
     }
 
     public record ErrorMessage(String message) {
+    }
+
+    /**
+     * message is always CommonMessageKey.VALIDATION_FAILED — a stable key,
+     * per the same contract every other error uses. field/detail carry the
+     * specifics, which come from Bean Validation and are prose until a
+     * DTO's annotation sets its own key-shaped message.
+     */
+    public record FieldValidationError(String field, String message, String detail) {
     }
 }
