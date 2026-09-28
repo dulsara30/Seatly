@@ -1,8 +1,9 @@
--- Seatly initial schema: user, event, rsvp, tag, event_tag, email_outbox.
--- "user" is a reserved word in PostgreSQL (backs CURRENT_USER), so every
--- reference to the table is double-quoted.
+-- Seatly initial schema: app_user, event, rsvp, tag, event_tag, email_outbox.
+-- Named app_user rather than "user" because USER is a reserved word in
+-- PostgreSQL (it backs CURRENT_USER), which would force every reference —
+-- migrations, JPA mappings, raw SQL — to be quoted forever.
 
-CREATE TABLE "user" (
+CREATE TABLE app_user (
     id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name       VARCHAR(100)  NOT NULL,
     email      VARCHAR(255)  NOT NULL,
@@ -12,7 +13,7 @@ CREATE TABLE "user" (
     is_deleted BOOLEAN       NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_user_email UNIQUE (email)
+    CONSTRAINT uq_app_user_email UNIQUE (email)
 );
 
 CREATE TABLE event (
@@ -30,7 +31,7 @@ CREATE TABLE event (
     is_deleted   BOOLEAN       NOT NULL DEFAULT FALSE,
     created_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_event_organizer FOREIGN KEY (organizer_id) REFERENCES "user" (id),
+    CONSTRAINT fk_event_organizer FOREIGN KEY (organizer_id) REFERENCES app_user (id),
     CONSTRAINT chk_event_mode CHECK (mode IN ('ONLINE', 'PHYSICAL')),
     CONSTRAINT chk_event_status CHECK (status IN ('UPCOMING', 'CANCELLED', 'COMPLETED')),
     CONSTRAINT chk_event_seat_limit CHECK (seat_limit >= 1)
@@ -49,7 +50,7 @@ CREATE TABLE rsvp (
     position   INT,
     created_at TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_rsvp_user FOREIGN KEY (user_id) REFERENCES "user" (id),
+    CONSTRAINT fk_rsvp_user FOREIGN KEY (user_id) REFERENCES app_user (id),
     CONSTRAINT fk_rsvp_event FOREIGN KEY (event_id) REFERENCES event (id),
     CONSTRAINT uq_rsvp_user_event UNIQUE (user_id, event_id),
     CONSTRAINT chk_rsvp_status CHECK (status IN ('CONFIRMED', 'WAITLISTED', 'CANCELLED'))
