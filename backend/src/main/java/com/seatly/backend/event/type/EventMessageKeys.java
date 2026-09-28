@@ -1,0 +1,28 @@
+package com.seatly.backend.event.type;
+
+/**
+ * The single source of every event message key string. Bean Validation
+ * annotations need compile-time constants, so they reference these directly;
+ * EventMessageKey reads the same constants, so a key is only ever spelled once.
+ */
+public interface EventMessageKeys {
+
+    String NOT_FOUND = "EVENT_ERROR_NOT_FOUND";
+    String NOT_ORGANIZER = "EVENT_ERROR_NOT_ORGANIZER";
+    String NOT_UPCOMING = "EVENT_ERROR_NOT_UPCOMING";
+    String DATE_MUST_BE_FUTURE = "EVENT_ERROR_DATE_MUST_BE_FUTURE";
+    String MEETING_LINK_REQUIRED = "EVENT_ERROR_MEETING_LINK_REQUIRED";
+    String LOCATION_REQUIRED = "EVENT_ERROR_LOCATION_REQUIRED";
+    String SEAT_LIMIT_BELOW_CONFIRMED = "EVENT_ERROR_SEAT_LIMIT_BELOW_CONFIRMED";
+    String TAG_NOT_FOUND = "EVENT_ERROR_TAG_NOT_FOUND";
+
+    String NAME_REQUIRED = "EVENT_ERROR_NAME_REQUIRED";
+    String NAME_TOO_LONG = "EVENT_ERROR_NAME_TOO_LONG";
+    String DESCRIPTION_REQUIRED = "EVENT_ERROR_DESCRIPTION_REQUIRED";
+    String MODE_REQUIRED = "EVENT_ERROR_MODE_REQUIRED";
+    String LOCATION_TOO_LONG = "EVENT_ERROR_LOCATION_TOO_LONG";
+    String MEETING_LINK_TOO_LONG = "EVENT_ERROR_MEETING_LINK_TOO_LONG";
+    String DATE_REQUIRED = "EVENT_ERROR_DATE_REQUIRED";
+    String SEAT_LIMIT_REQUIRED = "EVENT_ERROR_SEAT_LIMIT_REQUIRED";
+    String SEAT_LIMIT_MIN = "EVENT_ERROR_SEAT_LIMIT_MIN";
+}
