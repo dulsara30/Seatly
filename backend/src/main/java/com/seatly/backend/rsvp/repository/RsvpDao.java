@@ -12,6 +12,8 @@ public interface RsvpDao extends JpaRepository<Rsvp, Long> {
 
     long countByEventIdAndStatus(Long eventId, RsvpStatus status);
 
+    boolean existsByEventIdAndUserIdAndStatus(Long eventId, Long userId, RsvpStatus status);
+
     /**
      * One query for a whole page of events — the N+1 guard for seat counts.
      * An event with no RSVPs in the given status has no row in the result;

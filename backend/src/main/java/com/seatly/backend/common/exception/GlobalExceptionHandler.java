@@ -5,14 +5,18 @@ import com.seatly.backend.common.type.CommonMessageKey;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -29,6 +33,31 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex) {
         List<String> messages = ex.getBindingResult().getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.error(messages));
+    }
+
+    // Constraints on @RequestParam / @PathVariable (e.g. page size bounds).
+    // Spring MVC validates those itself and raises this, not the exception above.
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ResponseEntityDto<ResponseEntityDto.ErrorMessage>> handleHandlerMethodValidation(
+            HandlerMethodValidationException ex) {
+        List<String> messages = ex.getAllErrors().stream().map(MessageSourceResolvable::getDefaultMessage).toList();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.error(messages));
+    }
+
+    // A parameter that can't be converted to its type: ?mode=online, /events/abc.
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ResponseEntityDto<ResponseEntityDto.ErrorMessage>> handleArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.error(CommonMessageKey.INVALID_PARAMETER));
+    }
+
+    // Unparseable JSON, or a body value Jackson can't convert (unknown enum,
+    // badly formatted date). Never echo ex's message — it quotes the raw input.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ResponseEntityDto<ResponseEntityDto.ErrorMessage>> handleMessageNotReadable(
+            HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ResponseEntityDto.error(CommonMessageKey.MALFORMED_REQUEST_BODY));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
