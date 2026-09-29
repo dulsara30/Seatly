@@ -1,5 +1,6 @@
 package com.seatly.backend.event.model;
 
+import com.seatly.backend.common.constant.PaginationConstants;
 import com.seatly.backend.common.model.Auditable;
 import com.seatly.backend.event.type.EventMode;
 import com.seatly.backend.event.type.EventStatus;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
+import org.hibernate.annotations.BatchSize;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -74,7 +76,11 @@ public class Event extends Auditable {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
+    // Loaded lazily, but in batches: touching one event's tags loads the tags
+    // for every event of the page in a single IN query. A fetch join can't be
+    // used for this on a paged query — Hibernate would page in memory.
     @ManyToMany
+    @BatchSize(size = PaginationConstants.MAX_PAGE_SIZE)
     @JoinTable(
             name = "event_tag",
             joinColumns = @JoinColumn(name = "event_id"),
