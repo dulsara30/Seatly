@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,10 +28,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseEntityDto<ResponseEntityDto.ErrorMessage>> handleMethodArgumentNotValid(
+    public ResponseEntity<ResponseEntityDto<ResponseEntityDto.FieldValidationError>> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex) {
-        List<String> messages = ex.getBindingResult().getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.error(messages));
+        List<ResponseEntityDto.FieldValidationError> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> new ResponseEntityDto.FieldValidationError(
+                        fieldError.getField(), CommonMessageKey.VALIDATION_FAILED.getKey(), fieldError.getDefaultMessage()))
+                .toList();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.validationError(errors));
     }
 
     // Constraints on @RequestParam / @PathVariable (e.g. page size bounds).
@@ -41,7 +43,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseEntityDto<ResponseEntityDto.ErrorMessage>> handleHandlerMethodValidation(
             HandlerMethodValidationException ex) {
         List<String> messages = ex.getAllErrors().stream().map(MessageSourceResolvable::getDefaultMessage).toList();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.error(messages));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.errors(messages));
     }
 
     // A parameter that can't be converted to its type: ?mode=online, /events/abc.

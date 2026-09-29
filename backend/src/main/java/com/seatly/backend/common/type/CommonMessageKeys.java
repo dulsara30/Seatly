@@ -6,6 +6,7 @@ package com.seatly.backend.common.type;
  */
 public interface CommonMessageKeys {
 
+    String VALIDATION_FAILED = "VALIDATION_FAILED";
     String ACCESS_DENIED = "ACCESS_DENIED";
     String DATA_INTEGRITY_VIOLATION = "DATA_INTEGRITY_VIOLATION";
     String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
