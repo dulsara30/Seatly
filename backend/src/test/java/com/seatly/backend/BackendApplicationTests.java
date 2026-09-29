@@ -1,13 +1,13 @@
 package com.seatly.backend;
 
+import com.seatly.backend.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class BackendApplicationTests {
+// Shares the integration-test context, so it runs against Testcontainers
+// Postgres instead of needing the local docker-compose database.
+class BackendApplicationTests extends AbstractIntegrationTest {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {
+    }
 }

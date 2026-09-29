@@ -1,0 +1,53 @@
+# Continuous testing: the integration suite runs against a real Postgres
+# started by Testcontainers. GitHub's ubuntu runners ship with Docker, so no
+# database service or credentials need configuring here.
+name: Backend tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-test.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-test.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Test
+        run: ./mvnw -B -ntp clean verify
+
+      # On failure, keep the per-test reports so the cause can be read
+      # without re-running the job.
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: backend/target/surefire-reports/
+          retention-days: 7
