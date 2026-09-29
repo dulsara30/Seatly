@@ -1,9 +1,9 @@
 package com.seatly.backend.event.service;
 
 import com.seatly.backend.common.exception.EntityNotFoundException;
-import com.seatly.backend.common.exception.ForbiddenException;
 import com.seatly.backend.common.exception.ValidationException;
 import com.seatly.backend.common.payload.PageDto;
+import com.seatly.backend.common.security.CurrentUser;
 import com.seatly.backend.event.mapper.EventMapper;
 import com.seatly.backend.event.model.Event;
 import com.seatly.backend.event.model.Event_;
@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
 
-    // TODO: replace with the authenticated user's id once the auth module exists.
-    private static final Long CURRENT_USER_ID = 1L;
-
     private static final long NO_CONFIRMED_RSVPS = 0L;
 
     // Soonest first — what someone browsing for an event to attend wants.
@@ -54,6 +52,7 @@ public class EventServiceImpl implements EventService {
     private final TagDao tagDao;
     private final UserDao userDao;
     private final EventMapper eventMapper;
+    private final CurrentUser currentUser;
     private final Clock clock;
 
     @Override
@@ -66,7 +65,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.toEntity(request);
         // A reference, not a load: the organizer is only needed as a foreign
         // key here, so there is no reason to SELECT the whole user row.
-        event.setOrganizer(userDao.getReferenceById(currentUserId()));
+        event.setOrganizer(userDao.getReferenceById(currentUser.requireId()));
         event.setStatus(EventStatus.UPCOMING);
         event.setTags(tags);
         clearVenueFieldUnusedByMode(event);
@@ -168,9 +167,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void validateCallerIsOrganizer(Event event) {
-        if (!isOrganizer(event)) {
-            throw new ForbiddenException(EventMessageKey.NOT_ORGANIZER);
-        }
+        currentUser.requireOwner(organizerIdOf(event), EventMessageKey.NOT_ORGANIZER);
     }
 
     private void validateIsUpcoming(Event event) {
@@ -215,14 +212,20 @@ public class EventServiceImpl implements EventService {
 
     // A live check on every read, not a one-time grant: cancel your RSVP and
     // the link disappears from your next response.
+    // Anonymous visitors can read the event (it's a public endpoint) but
+    // never the link.
     private boolean canSeeMeetingLink(Event event) {
-        return isOrganizer(event)
-                || rsvpDao.existsByEventIdAndUserIdAndStatus(event.getId(), currentUserId(), RsvpStatus.CONFIRMED);
+        Optional<Long> callerId = currentUser.findId();
+        if (callerId.isEmpty()) {
+            return false;
+        }
+        return currentUser.isUser(organizerIdOf(event))
+                || rsvpDao.existsByEventIdAndUserIdAndStatus(event.getId(), callerId.get(), RsvpStatus.CONFIRMED);
     }
 
     // getId() on a lazy proxy returns the foreign key without loading the user.
-    private boolean isOrganizer(Event event) {
-        return event.getOrganizer().getId().equals(currentUserId());
+    private Long organizerIdOf(Event event) {
+        return event.getOrganizer().getId();
     }
 
     private long countConfirmed(Long eventId) {
@@ -248,9 +251,5 @@ public class EventServiceImpl implements EventService {
 
     private long availableSeats(Event event, long confirmedCount) {
         return event.getSeatLimit() - confirmedCount;
-    }
-
-    private Long currentUserId() {
-        return CURRENT_USER_ID;
     }
 }

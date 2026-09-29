@@ -13,6 +13,7 @@ import com.seatly.backend.support.TestData;
 import java.time.LocalDateTime;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
@@ -31,7 +32,7 @@ class CreateEventIntegrationTest extends AbstractIntegrationTest {
         assertThat(result).hasStatus(HttpStatus.CREATED);
         assertThat(result).bodyJson().extractingPath("$.results[0].status").isEqualTo(EventStatus.UPCOMING.name());
         assertThat(result).bodyJson().extractingPath("$.results[0].organizer.id")
-                .convertTo(Long.class).isEqualTo(TestData.CURRENT_USER_ID);
+                .convertTo(Long.class).isEqualTo(TestData.SEEDED_ORGANISER_ID);
         assertThat(result).bodyJson().extractingPath("$.results[0].availableSeats").isEqualTo(SEAT_LIMIT);
         assertThat(result).bodyJson().extractingPath("$.results[0].tags[0].name").isEqualTo("tech");
     }
@@ -120,8 +121,11 @@ class CreateEventIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void rejectsMalformedJson() {
-        MvcTestResult result = mvc.post().uri(EVENTS_PATH).contentType(MediaType.APPLICATION_JSON)
-                .content("{ not json").exchange();
+        // Authenticated: security runs before the body is parsed, so without a
+        // token this would be a 401 and never reach the JSON check.
+        MvcTestResult result = mvc.post().uri(EVENTS_PATH)
+                .header(HttpHeaders.AUTHORIZATION, bearerTokenFor(TestData.SEEDED_ORGANISER_ID))
+                .contentType(MediaType.APPLICATION_JSON).content("{ not json").exchange();
 
         assertError(result, HttpStatus.BAD_REQUEST, CommonMessageKeys.MALFORMED_REQUEST_BODY);
     }

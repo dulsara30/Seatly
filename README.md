@@ -39,18 +39,45 @@ wrapper (`./mvnw`), and Postgres runs in Docker.
    This starts Postgres 16 on host port `5433` (database `seatly`, user/password
    `seatly`), matching `backend/src/main/resources/application.yml`.
 
-2. **Run the backend**
+2. **Set the JWT signing key**
+
+   The backend signs access tokens with a key read from the `JWT_SIGNING_KEY`
+   environment variable — it is never stored in `application.yml` or git, and
+   the app refuses to start without it. It must be Base64 and at least 32
+   bytes. Generate one once:
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+   Then set it in the shell you start the backend from (PowerShell:
+   `$env:JWT_SIGNING_KEY = "<the key>"`, bash: `export JWT_SIGNING_KEY=<the key>`).
+   Changing the key logs everyone out, since existing tokens stop verifying.
+
+3. **Run the backend**
 
    ```bash
    cd backend
-   ./mvnw spring-boot:run
+   ./mvnw clean spring-boot:run
    ```
 
    Flyway applies the schema on startup. The API is served at
    `http://localhost:8080`, with Swagger UI at
    `http://localhost:8080/swagger-ui.html`.
 
-3. **Run the frontend**
+   Two seeded dev accounts exist (see `V2__seed_data.sql` and
+   `V3__seed_second_user.sql` for the password): `organiser@seatly.dev`, who
+   owns the demo events, and `attendee@seatly.dev`. In Swagger, call
+   `POST /v1/auth/login`, copy `accessToken`, and paste it into **Authorize**.
+
+   Tests don't need the key or the local database: they start their own
+   Postgres with Testcontainers and use a test-only key.
+
+   ```bash
+   ./mvnw clean test
+   ```
+
+4. **Run the frontend**
 
    The `frontend/` directory is not yet scaffolded. Once the Next.js app
    exists there, the usual flow will be:

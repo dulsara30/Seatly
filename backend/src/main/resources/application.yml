@@ -24,6 +24,20 @@ spring:
     virtual:
       enabled: true
 
+  # Users come from the database via JWT, not from Spring's in-memory default
+  # user — without this, every startup logs a random "generated security
+  # password" for an account nothing uses.
+  autoconfigure:
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+
+seatly:
+  jwt:
+    # Placeholder only — the value comes from the JWT_SIGNING_KEY environment
+    # variable (Base64, at least 32 bytes). No default: a missing key stops
+    # startup instead of signing tokens with something guessable.
+    signing-key: ${JWT_SIGNING_KEY}
+    access-token-ttl: 1h
+
 server:
   port: 8080
 

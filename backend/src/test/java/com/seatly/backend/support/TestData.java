@@ -14,8 +14,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class TestData {
 
-    /** Seeded by V2__seed_data.sql; matches EventServiceImpl's placeholder caller. */
-    public static final long CURRENT_USER_ID = 1L;
+    /** The organiser seeded by V2__seed_data.sql — the default caller in tests. */
+    public static final long SEEDED_ORGANISER_ID = 1L;
+    public static final String SEEDED_ORGANISER_EMAIL = "organiser@seatly.dev";
+    /** The attendee seeded by V3__seed_second_user.sql. */
+    public static final String SEEDED_ATTENDEE_EMAIL = "attendee@seatly.dev";
+    /** Password of both seeded accounts — dev data, documented in V2 and V3. */
+    public static final String SEEDED_PASSWORD = "seatly-dev-password";
 
     public static final String PHYSICAL_LOCATION = "Trace Expert City, Colombo";
     public static final String MEETING_LINK = "https://meet.example.test/seatly";
@@ -29,15 +34,36 @@ public class TestData {
     }
 
     /**
-     * Keeps the seeded caller and tags, removes everything tests create —
-     * including V2's demo events, so list assertions see only their own rows.
+     * Keeps the two seeded accounts and the tags, removes everything tests
+     * create — including V2's demo events, so list assertions see only their
+     * own rows. The seeded accounts are also restored, since some tests
+     * deactivate or delete them; keeping a row is not the same as keeping it
+     * as it was.
      */
     public void reset() {
         jdbc.update("DELETE FROM rsvp");
         jdbc.update("DELETE FROM event_tag");
         jdbc.update("DELETE FROM event");
         jdbc.update("DELETE FROM email_outbox");
-        jdbc.update("DELETE FROM app_user WHERE id <> ?", CURRENT_USER_ID);
+        jdbc.update("DELETE FROM app_user WHERE email NOT IN (?, ?)", SEEDED_ORGANISER_EMAIL, SEEDED_ATTENDEE_EMAIL);
+        jdbc.update("UPDATE app_user SET is_active = TRUE, is_deleted = FALSE WHERE email IN (?, ?)",
+                SEEDED_ORGANISER_EMAIL, SEEDED_ATTENDEE_EMAIL);
+    }
+
+    public long userIdByEmail(String email) {
+        return jdbc.queryForObject("SELECT id FROM app_user WHERE email = ?", Long.class, email);
+    }
+
+    public String passwordHashOf(String email) {
+        return jdbc.queryForObject("SELECT password FROM app_user WHERE email = ?", String.class, email);
+    }
+
+    public void softDeleteUser(long userId) {
+        jdbc.update("UPDATE app_user SET is_deleted = TRUE WHERE id = ?", userId);
+    }
+
+    public void deactivateUser(long userId) {
+        jdbc.update("UPDATE app_user SET is_active = FALSE WHERE id = ?", userId);
     }
 
     public long insertUser() {

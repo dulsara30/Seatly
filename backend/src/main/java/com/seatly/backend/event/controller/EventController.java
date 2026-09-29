@@ -1,5 +1,6 @@
 package com.seatly.backend.event.controller;
 
+import com.seatly.backend.common.constant.ApiPaths;
 import com.seatly.backend.common.constant.ApiResponseCodes;
 import com.seatly.backend.common.constant.PaginationConstants;
 import com.seatly.backend.common.payload.PageDto;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/events")
+@RequestMapping(ApiPaths.EVENTS)
 @RequiredArgsConstructor
 @Tag(name = "Events", description = "Create, browse and edit events")
 public class EventController {
@@ -43,6 +44,7 @@ public class EventController {
     @ApiResponse(responseCode = ApiResponseCodes.CREATED, description = "Event created")
     @ApiResponse(responseCode = ApiResponseCodes.BAD_REQUEST,
             description = "Invalid field, date not in the future, venue missing for the mode, or unknown tag id")
+    @ApiResponse(responseCode = ApiResponseCodes.UNAUTHORIZED, description = "Missing, invalid or expired token")
     public ResponseEntity<ResponseEntityDto<EventDetailResponseDto>> createEvent(
             @Valid @RequestBody CreateEventRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -71,7 +73,8 @@ public class EventController {
 
     @GetMapping("/{eventId}")
     @Operation(summary = "Get an event",
-            description = "meetingLink is included only for the organiser and confirmed attendees.")
+            description = "Public. meetingLink is included only when the token belongs to the organiser "
+                    + "or a confirmed attendee.")
     @ApiResponse(responseCode = ApiResponseCodes.OK, description = "The event")
     @ApiResponse(responseCode = ApiResponseCodes.NOT_FOUND, description = "No such event, or it was deleted")
     public ResponseEntity<ResponseEntityDto<EventDetailResponseDto>> getEventById(@PathVariable Long eventId) {
@@ -84,6 +87,7 @@ public class EventController {
     @ApiResponse(responseCode = ApiResponseCodes.OK, description = "Event updated")
     @ApiResponse(responseCode = ApiResponseCodes.BAD_REQUEST,
             description = "Invalid field, event not UPCOMING, seat limit below confirmed count, or unknown tag id")
+    @ApiResponse(responseCode = ApiResponseCodes.UNAUTHORIZED, description = "Missing, invalid or expired token")
     @ApiResponse(responseCode = ApiResponseCodes.FORBIDDEN, description = "Caller is not the organiser")
     @ApiResponse(responseCode = ApiResponseCodes.NOT_FOUND, description = "No such event, or it was deleted")
     public ResponseEntity<ResponseEntityDto<EventDetailResponseDto>> updateEvent(

@@ -7,6 +7,7 @@ package com.seatly.backend.common.type;
  */
 public enum CommonMessageKey implements MessageKey {
 
+    AUTHENTICATION_REQUIRED(CommonMessageKeys.AUTHENTICATION_REQUIRED),
     ACCESS_DENIED(CommonMessageKeys.ACCESS_DENIED),
     DATA_INTEGRITY_VIOLATION(CommonMessageKeys.DATA_INTEGRITY_VIOLATION),
     INTERNAL_SERVER_ERROR(CommonMessageKeys.INTERNAL_SERVER_ERROR),
