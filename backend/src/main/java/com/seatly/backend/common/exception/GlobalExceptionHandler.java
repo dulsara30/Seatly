@@ -31,8 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseEntityDto<ResponseEntityDto.FieldValidationError>> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex) {
         List<ResponseEntityDto.FieldValidationError> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> new ResponseEntityDto.FieldValidationError(
-                        fieldError.getField(), CommonMessageKey.VALIDATION_FAILED.getKey(), fieldError.getDefaultMessage()))
+                .map(fieldError -> new ResponseEntityDto.FieldValidationError(fieldError.getField(), fieldError.getDefaultMessage()))
                 .toList();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.validationError(errors));
     }
