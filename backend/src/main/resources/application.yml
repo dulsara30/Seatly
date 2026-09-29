@@ -2,6 +2,16 @@ spring:
   application:
     name: seatly
 
+  # Local secrets. Spring has no built-in .env support, but a .env file is
+  # valid properties syntax (KEY=value), so it's imported as one — the
+  # [.properties] hint tells Spring how to parse a file with no extension.
+  # Resolved against the working directory, i.e. backend/ when started with
+  # ./mvnw from there. `optional:` because it's absent in CI and production:
+  # there, the same keys come from real environment variables, which take
+  # precedence over this file anyway.
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: jdbc:postgresql://localhost:5433/seatly
     username: seatly
