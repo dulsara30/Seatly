@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/*
+ * Seatly design tokens — the only values the UI may use.
+ *
+ * Every `--x-*: initial;` line deletes Tailwind's built-in values for that
+ * group, so a class outside the design system (bg-blue-500, rounded-2xl,
+ * shadow-md) simply doesn't exist. Arbitrary values — a utility followed by a
+ * square-bracketed raw value — would still compile, so `npm run lint` rejects
+ * them separately: see scripts/check-design-tokens.mjs.
+ *
+ * YELLOW IS AN ACCENT, NEVER A BACKGROUND. A filled yellow surface appears in
+ * exactly three places: the active filter chip, the seat bar fill, and the
+ * single primary CTA on a screen. Anything else that needs emphasis is black.
+ */
+@theme {
+  --color-*: initial;
+
+  --color-black: #0d0d0d;
+  --color-white: #ffffff;
+
+  --color-yellow-50: #fef9e7;
+  --color-yellow-500: #f5c518;
+  --color-yellow-600: #d9ac0f;
+  --color-yellow-700: #8a6d08;
+
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f4f4f5;
+  --color-gray-200: #e4e4e7;
+  --color-gray-300: #d4d4d8;
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+
+  --color-green-50: #ecfdf5;
+  --color-green-700: #047857;
+
+  --color-red-50: #fef2f2;
+  --color-red-300: #fca5a5;
+  --color-red-600: #dc2626;
+
+  --radius-*: initial;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* The Figma file names shadow sm/md/lg but gives no values yet. Rather than
+     invent them, there are none until the design specifies them. */
+  --shadow-*: initial;
+
+  --font-*: initial;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --font-weight-*: initial;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Type scale from the Figma "Typography" frame: size and weight as
+     designed. Line heights and letter spacing aren't specified there, so
+     these are chosen defaults — tight for large headings, open for body. */
+  --text-*: initial;
+  --text-display: 48px;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 700;
+  --text-heading-xl: 34px;
+  --text-heading-xl--line-height: 1.15;
+  --text-heading-xl--letter-spacing: -0.02em;
+  --text-heading-xl--font-weight: 700;
+  --text-heading-l: 24px;
+  --text-heading-l--line-height: 1.25;
+  --text-heading-l--letter-spacing: -0.01em;
+  --text-heading-l--font-weight: 700;
+  --text-heading-m: 20px;
+  --text-heading-m--line-height: 1.3;
+  --text-heading-m--font-weight: 600;
+  --text-heading-s: 17px;
+  --text-heading-s--line-height: 1.35;
+  --text-heading-s--font-weight: 600;
+  --text-body-l: 16px;
+  --text-body-l--line-height: 1.55;
+  --text-body-l--font-weight: 400;
+  --text-body-m: 15px;
+  --text-body-m--line-height: 1.5;
+  --text-body-m--font-weight: 400;
+  --text-body-s: 13px;
+  --text-body-s--line-height: 1.45;
+  --text-body-s--font-weight: 400;
+  --text-label-m: 14px;
+  --text-label-m--line-height: 1.4;
+  --text-label-m--font-weight: 500;
+  --text-label-s: 13px;
+  --text-label-s--line-height: 1.4;
+  --text-label-s--font-weight: 600;
+  --text-caption: 12px;
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 400;
+  --text-overline: 11px;
+  --text-overline--line-height: 1.3;
+  --text-overline--letter-spacing: 0.08em;
+  --text-overline--font-weight: 600;
+}
+
+body {
+  @apply bg-white font-sans text-body-m text-black antialiased;
+}

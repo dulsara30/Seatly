@@ -39,20 +39,23 @@ wrapper (`./mvnw`), and Postgres runs in Docker.
    This starts Postgres 16 on host port `5433` (database `seatly`, user/password
    `seatly`), matching `backend/src/main/resources/application.yml`.
 
-2. **Set the JWT signing key**
+2. **Create `backend/.env`**
 
-   The backend signs access tokens with a key read from the `JWT_SIGNING_KEY`
-   environment variable — it is never stored in `application.yml` or git, and
-   the app refuses to start without it. It must be Base64 and at least 32
-   bytes. Generate one once:
+   The backend's secrets live in `backend/.env`, which is git-ignored.
+   `backend/.env.example` lists every key it needs — copy it and fill it in:
 
    ```bash
+   cp backend/.env.example backend/.env
    openssl rand -base64 32
    ```
 
-   Then set it in the shell you start the backend from (PowerShell:
-   `$env:JWT_SIGNING_KEY = "<the key>"`, bash: `export JWT_SIGNING_KEY=<the key>`).
-   Changing the key logs everyone out, since existing tokens stop verifying.
+   Paste the generated value after `JWT_SIGNING_KEY=`. It signs access
+   tokens: Base64, at least 32 bytes, and the app refuses to start without it.
+   Changing it logs everyone out, since existing tokens stop verifying.
+
+   `application.yml` imports this file (`spring.config.import`). A real
+   environment variable with the same name overrides it — that's how CI and
+   production supply the key, with no file on disk.
 
 3. **Run the backend**
 
