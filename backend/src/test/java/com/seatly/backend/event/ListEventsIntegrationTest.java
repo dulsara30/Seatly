@@ -27,15 +27,15 @@ class ListEventsIntegrationTest extends AbstractIntegrationTest {
     // Two listable events, plus one cancelled and one deleted that must never appear.
     @BeforeEach
     void arrangeEvents() {
-        testData.insertEvent(TestData.CURRENT_USER_ID, SOONER, EventMode.ONLINE, EventStatus.UPCOMING, 20,
+        testData.insertEvent(TestData.SEEDED_ORGANISER_ID, SOONER, EventMode.ONLINE, EventStatus.UPCOMING, 20,
                 NOW.plusDays(1));
-        laterEventId = testData.insertEvent(TestData.CURRENT_USER_ID, LATER, EventMode.PHYSICAL,
+        laterEventId = testData.insertEvent(TestData.SEEDED_ORGANISER_ID, LATER, EventMode.PHYSICAL,
                 EventStatus.UPCOMING, 10, NOW.plusDays(3));
         testData.tagEvent(laterEventId, "tech");
 
-        testData.insertEvent(TestData.CURRENT_USER_ID, "Cancelled", EventMode.ONLINE, EventStatus.CANCELLED, 10,
+        testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "Cancelled", EventMode.ONLINE, EventStatus.CANCELLED, 10,
                 NOW.plusDays(2));
-        long deletedEventId = testData.insertEvent(TestData.CURRENT_USER_ID, "Deleted", EventMode.ONLINE,
+        long deletedEventId = testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "Deleted", EventMode.ONLINE,
                 EventStatus.UPCOMING, 10, NOW.plusDays(2));
         testData.softDeleteEvent(deletedEventId);
     }
@@ -83,9 +83,9 @@ class ListEventsIntegrationTest extends AbstractIntegrationTest {
     // "%" is a LIKE wildcard. Unescaped, "100%" would also match "100 Remote".
     @Test
     void treatsLikeWildcardsInSearchAsLiteralText() {
-        testData.insertEvent(TestData.CURRENT_USER_ID, "100% Remote", EventMode.ONLINE, EventStatus.UPCOMING, 10,
+        testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "100% Remote", EventMode.ONLINE, EventStatus.UPCOMING, 10,
                 NOW.plusDays(5));
-        testData.insertEvent(TestData.CURRENT_USER_ID, "100 Remote", EventMode.ONLINE, EventStatus.UPCOMING, 10,
+        testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "100 Remote", EventMode.ONLINE, EventStatus.UPCOMING, 10,
                 NOW.plusDays(5));
 
         assertThat(mvc.get().uri(EVENTS_PATH).param("search", "100%").exchange())

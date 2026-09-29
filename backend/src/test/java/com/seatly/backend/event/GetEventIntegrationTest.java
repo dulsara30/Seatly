@@ -45,7 +45,7 @@ class GetEventIntegrationTest extends AbstractIntegrationTest {
     // Detail is not limited to UPCOMING — a cancelled event can still be viewed.
     @Test
     void returnsCancelledEvent() {
-        long eventId = testData.insertEvent(TestData.CURRENT_USER_ID, "Cancelled", EventMode.PHYSICAL,
+        long eventId = testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "Cancelled", EventMode.PHYSICAL,
                 EventStatus.CANCELLED, SEAT_LIMIT, NEXT_WEEK);
 
         assertThat(get(eventId)).hasStatusOk();
@@ -89,7 +89,7 @@ class GetEventIntegrationTest extends AbstractIntegrationTest {
     @Test
     void showsMeetingLinkToConfirmedAttendee() {
         long eventId = someoneElsesOnlineEvent();
-        testData.insertRsvp(eventId, TestData.CURRENT_USER_ID, RsvpStatus.CONFIRMED);
+        testData.insertRsvp(eventId, TestData.SEEDED_ORGANISER_ID, RsvpStatus.CONFIRMED);
 
         assertThat(get(eventId)).bodyJson().extractingPath("$.results[0].meetingLink").isEqualTo(TestData.MEETING_LINK);
     }
@@ -97,13 +97,13 @@ class GetEventIntegrationTest extends AbstractIntegrationTest {
     @Test
     void hidesMeetingLinkFromWaitlistedAttendee() {
         long eventId = someoneElsesOnlineEvent();
-        testData.insertRsvp(eventId, TestData.CURRENT_USER_ID, RsvpStatus.WAITLISTED);
+        testData.insertRsvp(eventId, TestData.SEEDED_ORGANISER_ID, RsvpStatus.WAITLISTED);
 
         assertThat(get(eventId)).bodyJson().extractingPath("$.results[0].meetingLink").isNull();
     }
 
     private long ownEvent(EventMode mode) {
-        return testData.insertEvent(TestData.CURRENT_USER_ID, "Own Event", mode, EventStatus.UPCOMING,
+        return testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "Own Event", mode, EventStatus.UPCOMING,
                 SEAT_LIMIT, NEXT_WEEK);
     }
 

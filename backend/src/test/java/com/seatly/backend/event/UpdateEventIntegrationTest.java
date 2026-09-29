@@ -76,7 +76,7 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void rejectsUpdateToCancelledEvent() {
-        long eventId = testData.insertEvent(TestData.CURRENT_USER_ID, "Cancelled", EventMode.PHYSICAL,
+        long eventId = testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "Cancelled", EventMode.PHYSICAL,
                 EventStatus.CANCELLED, SEAT_LIMIT, NEXT_WEEK);
 
         assertError(patch(eventId, changes().name("Renamed").build()),
@@ -206,7 +206,7 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
     }
 
     private long ownEvent(EventMode mode) {
-        return testData.insertEvent(TestData.CURRENT_USER_ID, "Own Event", mode, EventStatus.UPCOMING,
+        return testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "Own Event", mode, EventStatus.UPCOMING,
                 SEAT_LIMIT, NEXT_WEEK);
     }
 

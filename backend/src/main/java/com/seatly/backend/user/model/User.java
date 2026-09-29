@@ -11,10 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Minimal mapping of app_user so Event has an organizer to reference. The
- * user module (service, controller, auth) builds on this later.
- */
 @Entity
 @Table(name = "app_user")
 @Getter
@@ -26,16 +22,18 @@ public class User extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "name", nullable = false, length = UserFieldLimits.NAME_MAX_LENGTH)
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true)
+    // Always stored lowercase, so the unique constraint is case-insensitive in practice.
+    @Column(name = "email", nullable = false, unique = true, length = UserFieldLimits.EMAIL_MAX_LENGTH)
     private String email;
 
+    // A BCrypt hash, never the password itself.
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "bio", length = 500)
+    @Column(name = "bio", length = UserFieldLimits.BIO_MAX_LENGTH)
     private String bio;
 
     @Column(name = "is_active", nullable = false)
