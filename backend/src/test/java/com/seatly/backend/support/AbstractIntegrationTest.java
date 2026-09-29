@@ -45,6 +45,7 @@ public abstract class AbstractIntegrationTest {
 
     protected static final String EVENTS_PATH = "/v1/events";
     protected static final String EVENT_PATH = "/v1/events/{eventId}";
+    protected static final String RSVP_PATH = "/v1/events/{eventId}/rsvp";
 
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -101,6 +102,21 @@ public abstract class AbstractIntegrationTest {
     protected MvcTestResult patchAs(long eventId, Object body, long userId) {
         return mvc.patch().uri(EVENT_PATH, eventId).header(HttpHeaders.AUTHORIZATION, bearerTokenFor(userId))
                 .contentType(MediaType.APPLICATION_JSON).content(toJson(body)).exchange();
+    }
+
+    // RSVP endpoints take no body — the event is in the path, the caller in the token.
+
+    protected MvcTestResult rsvpAs(long eventId, long userId) {
+        return mvc.post().uri(RSVP_PATH, eventId).header(HttpHeaders.AUTHORIZATION, bearerTokenFor(userId)).exchange();
+    }
+
+    protected MvcTestResult cancelRsvpAs(long eventId, long userId) {
+        return mvc.delete().uri(RSVP_PATH, eventId).header(HttpHeaders.AUTHORIZATION, bearerTokenFor(userId))
+                .exchange();
+    }
+
+    protected MvcTestResult getPathAs(String path, long userId, Object... uriVariables) {
+        return mvc.get().uri(path, uriVariables).header(HttpHeaders.AUTHORIZATION, bearerTokenFor(userId)).exchange();
     }
 
     protected MvcTestResult get(long eventId) {

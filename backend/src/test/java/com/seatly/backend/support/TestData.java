@@ -4,6 +4,10 @@ import com.seatly.backend.event.type.EventMode;
 import com.seatly.backend.event.type.EventStatus;
 import com.seatly.backend.rsvp.type.RsvpStatus;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -88,6 +92,39 @@ public class TestData {
 
     public void insertRsvp(long eventId, long userId, RsvpStatus status) {
         jdbc.update("INSERT INTO rsvp (user_id, event_id, status) VALUES (?, ?, ?)", userId, eventId, status.name());
+    }
+
+    /** A queue of fresh users at positions 1..count; returns their ids in queue order. */
+    public List<Long> insertWaitlist(long eventId, int count) {
+        List<Long> userIds = new ArrayList<>();
+        for (int position = 1; position <= count; position++) {
+            long userId = insertUser();
+            jdbc.update("INSERT INTO rsvp (user_id, event_id, status, position) VALUES (?, ?, ?, ?)",
+                    userId, eventId, RsvpStatus.WAITLISTED.name(), position);
+            userIds.add(userId);
+        }
+        return userIds;
+    }
+
+    public long countRsvps(long eventId, RsvpStatus status) {
+        return jdbc.queryForObject("SELECT COUNT(*) FROM rsvp WHERE event_id = ? AND status = ?",
+                Long.class, eventId, status.name());
+    }
+
+    public String rsvpStatusOf(long eventId, long userId) {
+        return jdbc.queryForObject("SELECT status FROM rsvp WHERE event_id = ? AND user_id = ?",
+                String.class, eventId, userId);
+    }
+
+    /** user id -> position, for the current queue, in position order. */
+    public Map<Long, Integer> waitlistPositions(long eventId) {
+        Map<Long, Integer> positions = new LinkedHashMap<>();
+        jdbc.query("SELECT user_id, position FROM rsvp WHERE event_id = ? AND status = ? ORDER BY position",
+                row -> {
+                    positions.put(row.getLong("user_id"), row.getInt("position"));
+                },
+                eventId, RsvpStatus.WAITLISTED.name());
+        return positions;
     }
 
     /** One RSVP each from a fresh user — (user_id, event_id) is unique. */
