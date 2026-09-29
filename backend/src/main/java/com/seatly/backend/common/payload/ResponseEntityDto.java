@@ -18,6 +18,15 @@ public record ResponseEntityDto<T>(ResponseStatusType status, List<T> results) {
         return new ResponseEntityDto<>(ResponseStatusType.UNSUCCESSFUL, List.of(new ErrorMessage(messageKey.getKey())));
     }
 
+    /**
+     * For error sources that already produce key-shaped strings themselves
+     * (e.g. a @Min/@Max message attribute set to a CommonMessageKeys
+     * constant), rather than a single MessageKey enum value.
+     */
+    public static ResponseEntityDto<ErrorMessage> errors(List<String> keys) {
+        return new ResponseEntityDto<>(ResponseStatusType.UNSUCCESSFUL, keys.stream().map(ErrorMessage::new).toList());
+    }
+
     public static ResponseEntityDto<FieldValidationError> validationError(List<FieldValidationError> errors) {
         return new ResponseEntityDto<>(ResponseStatusType.UNSUCCESSFUL, errors);
     }
@@ -26,11 +35,11 @@ public record ResponseEntityDto<T>(ResponseStatusType status, List<T> results) {
     }
 
     /**
-     * message is always CommonMessageKey.VALIDATION_FAILED — a stable key,
-     * per the same contract every other error uses. field/detail carry the
-     * specifics, which come from Bean Validation and are prose until a
-     * DTO's annotation sets its own key-shaped message.
+     * message is the DTO's own annotation-supplied key (e.g.
+     * @NotBlank(message = EventMessageKeys.NAME_REQUIRED)) — every request
+     * DTO's Bean Validation annotations set one explicitly, so this is
+     * already key-shaped, not prose. field says which one failed.
      */
-    public record FieldValidationError(String field, String message, String detail) {
+    public record FieldValidationError(String field, String message) {
     }
 }

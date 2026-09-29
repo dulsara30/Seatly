@@ -1,0 +1,19 @@
+package com.seatly.backend.event.service;
+
+import com.seatly.backend.common.payload.PageDto;
+import com.seatly.backend.event.payload.CreateEventRequestDto;
+import com.seatly.backend.event.payload.EventDetailResponseDto;
+import com.seatly.backend.event.payload.EventFilterDto;
+import com.seatly.backend.event.payload.EventResponseDto;
+import com.seatly.backend.event.payload.UpdateEventRequestDto;
+
+public interface EventService {
+
+    EventDetailResponseDto createEvent(CreateEventRequestDto request);
+
+    PageDto<EventResponseDto> getUpcomingEvents(EventFilterDto filter, int page, int size);
+
+    EventDetailResponseDto getEventById(Long eventId);
+
+    EventDetailResponseDto updateEvent(Long eventId, UpdateEventRequestDto request);
+}
