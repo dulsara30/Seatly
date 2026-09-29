@@ -4,6 +4,7 @@ import com.seatly.backend.common.exception.EntityNotFoundException;
 import com.seatly.backend.common.exception.ValidationException;
 import com.seatly.backend.common.payload.PageDto;
 import com.seatly.backend.common.security.CurrentUser;
+import com.seatly.backend.common.util.SeatUtils;
 import com.seatly.backend.event.mapper.EventMapper;
 import com.seatly.backend.event.model.Event;
 import com.seatly.backend.event.model.Event_;
@@ -18,6 +19,7 @@ import com.seatly.backend.event.type.EventMode;
 import com.seatly.backend.event.type.EventStatus;
 import com.seatly.backend.rsvp.repository.EventRsvpCount;
 import com.seatly.backend.rsvp.repository.RsvpDao;
+import com.seatly.backend.rsvp.service.WaitlistManager;
 import com.seatly.backend.rsvp.type.RsvpStatus;
 import com.seatly.backend.tag.model.Tag;
 import com.seatly.backend.tag.repository.TagDao;
@@ -53,6 +55,7 @@ public class EventServiceImpl implements EventService {
     private final UserDao userDao;
     private final EventMapper eventMapper;
     private final CurrentUser currentUser;
+    private final WaitlistManager waitlistManager;
     private final Clock clock;
 
     @Override
@@ -120,6 +123,11 @@ public class EventServiceImpl implements EventService {
         // Throwing here rolls the transaction back, discarding the change.
         validateVenueForMode(event.getMode(), event.getLocation(), event.getMeetingLink());
         clearVenueFieldUnusedByMode(event);
+        // After every check has passed, still under the same FOR UPDATE lock:
+        // a raised limit frees seats, which go to the front of the waitlist.
+        if (request.seatLimit() != null) {
+            waitlistManager.rebalance(event);
+        }
 
         return toDetailResponse(event);
     }
@@ -250,6 +258,6 @@ public class EventServiceImpl implements EventService {
     }
 
     private long availableSeats(Event event, long confirmedCount) {
-        return event.getSeatLimit() - confirmedCount;
+        return SeatUtils.availableSeats(event.getSeatLimit(), confirmedCount);
     }
 }
