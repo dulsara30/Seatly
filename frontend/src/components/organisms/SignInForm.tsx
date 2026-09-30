@@ -13,10 +13,7 @@ import { signInSchema, type SignInFormValues } from "@/validation/authSchemas";
 
 const INITIAL_VALUES: SignInFormValues = { email: "", password: "" };
 
-/**
- * Logs in through the Next route handler (useLogin -> /api/auth/login), which
- * sets the httpOnly session cookie. The token itself never reaches this code.
- */
+// Goes via the Next route handler, which sets the httpOnly cookie; the token never reaches here.
 export function SignInForm({ returnTo }: { returnTo: string | undefined }) {
   const router = useRouter();
   const login = useLogin();

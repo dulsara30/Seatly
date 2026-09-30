@@ -32,12 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenService jwtTokenService;
     private final CurrentUser currentUser;
 
-    /**
-     * A real hash of a random value, checked when a login email doesn't exist.
-     * BCrypt is deliberately slow, so answering "no such user" without running
-     * it would be measurably faster than "wrong password" — and the timing
-     * alone would reveal which emails are registered.
-     */
+    // Dummy hash checked for unknown emails, so login timing can't reveal registered emails.
     private final String unknownUserPasswordHash;
 
     public AuthServiceImpl(UserDao userDao, UserMapper userMapper, PasswordEncoder passwordEncoder,
@@ -55,9 +50,7 @@ public class AuthServiceImpl implements AuthService {
     public UserResponseDto register(RegisterRequestDto request) {
         validatePasswordFitsBcrypt(request.password());
         String email = normalizeEmail(request.email());
-        // A fast, friendly check. Two registrations racing on the same email
-        // can both pass it — the unique constraint on app_user.email is the
-        // real guarantee, and surfaces as 409 DATA_INTEGRITY_VIOLATION.
+        // Friendly check only; the unique constraint on app_user.email is the real guarantee.
         if (userDao.existsByEmail(email)) {
             throw new ConflictException(AuthMessageKey.EMAIL_ALREADY_REGISTERED);
         }
@@ -69,10 +62,7 @@ public class AuthServiceImpl implements AuthService {
         return userMapper.toResponseDto(userDao.save(user));
     }
 
-    /**
-     * One answer for every failure — unknown email, wrong password, disabled
-     * account — so a login attempt can't be used to discover who has an account.
-     */
+    // One error for every failure, so login can't reveal who has an account.
     @Override
     @Transactional(readOnly = true)
     public AuthResponseDto login(LoginRequestDto request) {
@@ -89,8 +79,6 @@ public class AuthServiceImpl implements AuthService {
                 jwtTokenService.issueAccessToken(user.get().getId()), userMapper.toResponseDto(user.get()));
     }
 
-    // A token outlives nothing about the account: if the user was deleted
-    // after it was issued, it stops identifying anyone.
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto getCurrentUser() {
@@ -105,8 +93,7 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    // "Dulsara@Example.com" and "dulsara@example.com" are the same inbox, so
-    // they must be the same account.
+    // Same inbox whatever the case, so emails are stored lowercase.
     private String normalizeEmail(String email) {
         return email.toLowerCase(Locale.ROOT);
     }

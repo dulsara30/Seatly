@@ -1,6 +1,5 @@
 import { AVATAR_INITIALS_LENGTH } from "@/constants/ui";
 
-/** "Nimali Perera" -> "NP", "Madonna" -> "MA". */
 export function initialsOf(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
   const letters =

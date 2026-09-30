@@ -10,7 +10,6 @@ interface FilterBarProps {
   tags: Tag[];
   activeTag: string | undefined;
   onTagChange: (tagName: string | undefined) => void;
-  /** Present once results are known. */
   resultCount: number | undefined;
   onClear: () => void;
 }
@@ -20,15 +19,7 @@ const MODE_OPTIONS = [
   { value: EventMode.PHYSICAL, label: Copy.badge.PHYSICAL },
 ] as const;
 
-/**
- * Filters grouped by kind, so "Online" never sits next to "#tech" as if they
- * were the same sort of thing.
- *
- * Mode and tag are single-select because that's what GET /v1/events accepts
- * (one `mode`, one `tag`). The design's Status group isn't here: the list
- * endpoint only returns UPCOMING events and can't filter by the viewer's
- * RSVPs, and filtering on the client would silently skip unloaded pages.
- */
+// Single-select and no Status group: GET /v1/events takes one mode/tag, UPCOMING only.
 export function FilterBar({ mode, onModeChange, tags, activeTag, onTagChange, resultCount, onClear }: FilterBarProps) {
   const hasActiveFilter = mode !== undefined || activeTag !== undefined;
 

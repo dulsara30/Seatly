@@ -1,6 +1,5 @@
 import type { Id } from "@/types/entities/primitives";
 
-/** Every page route in the app. */
 export const Routes = {
   home: "/",
   signIn: "/sign-in",
@@ -12,24 +11,15 @@ export const Routes = {
   manageEvent: (eventId: Id) => `/dashboard/events/${eventId}`,
 } as const;
 
-/**
- * The other spellings people type for sign in / sign up. next.config.ts
- * redirects each to the canonical route, so a guess lands on the page
- * instead of a 404.
- */
+// next.config.ts redirects each alias to the canonical route.
 export const RouteAliases = {
   signIn: ["/login", "/log-in", "/signin"],
   signUp: ["/register", "/signup"],
 } as const;
 
-/**
- * Query param sign-in reads to send you back where you were headed. Always a
- * same-site path; whatever reads it must reject anything that isn't one
- * ("//evil.example" included), or sign-in becomes an open redirect.
- */
+// Readers must accept only same-site paths, or sign-in becomes an open redirect.
 export const RETURN_TO_PARAM = "returnTo";
 
-/** "/sign-in?returnTo=/events/4" - sign in, then land back where you were. */
 export const withReturnTo = (route: string, returnTo: string | undefined) =>
   returnTo
     ? `${route}?${new URLSearchParams({ [RETURN_TO_PARAM]: returnTo })}`

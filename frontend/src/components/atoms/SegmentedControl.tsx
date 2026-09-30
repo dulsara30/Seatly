@@ -12,10 +12,7 @@ interface SegmentedControlProps<Value extends string> {
   onChange: (value: Value) => void;
 }
 
-/**
- * The ACTIVE segment is black, not yellow. Yellow is kept for the one primary
- * action on a screen; an active toggle competing with it would dilute both.
- */
+// Active is black, not yellow: yellow is kept for the one primary action on a screen.
 export function SegmentedControl<Value extends string>({ label, options, value, onChange }: SegmentedControlProps<Value>) {
   return (
     <div role="radiogroup" aria-label={label} className="inline-flex w-fit rounded-full bg-gray-100 p-1">

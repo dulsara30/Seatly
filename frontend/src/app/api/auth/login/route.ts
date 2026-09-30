@@ -17,12 +17,7 @@ import type {
   SessionResponse,
 } from "@/types/responses/AuthResponse";
 
-/**
- * Login is the one call that can't go through the generic proxy: Spring
- * returns the token in the JSON body, and it has to be moved into the
- * httpOnly cookie before anything reaches the browser. The browser gets the
- * user only - the token never exists in page JavaScript.
- */
+// Moves the token from Spring's body into the httpOnly cookie; the browser never sees it.
 export async function POST(request: NextRequest) {
   if (!isAllowedOrigin(request)) {
     return errorResponse(HttpStatus.FORBIDDEN, "ACCESS_DENIED");
@@ -39,12 +34,10 @@ export async function POST(request: NextRequest) {
     return backendUnavailable();
   }
 
-  // Wrong credentials, validation errors: Spring's envelope, passed through.
   if (!backendResponse.ok) {
     return relayBackendResponse(backendResponse);
   }
 
-  // Trusted: this is our own backend's documented response shape.
   const envelope: ApiEnvelope<BackendAuthResponse> =
     await backendResponse.json();
   const [auth] = envelope.results;

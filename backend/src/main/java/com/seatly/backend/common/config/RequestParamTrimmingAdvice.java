@@ -5,12 +5,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.InitBinder;
 
-/**
- * The other half of the global trimmer. StringTrimModule only sees JSON
- * bodies; query parameters and path variables are bound by Spring MVC, not
- * Jackson. Without this, "?tag=" arrives as "" rather than null and filters
- * on an empty tag instead of not filtering at all.
- */
+// StringTrimModule only sees JSON bodies; this trims query params and path variables ("?tag=").
 @ControllerAdvice
 public class RequestParamTrimmingAdvice {
 

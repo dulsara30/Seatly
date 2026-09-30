@@ -27,14 +27,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Every write here starts by taking the SAME lock EventServiceImpl.updateEvent
- * takes: SELECT ... FOR UPDATE on the event row. A lock only protects what
- * every writer agrees to take, so RSVP creation, RSVP cancellation and seat
- * limit changes all queue on that one row, and each sees the others' committed
- * result. The rsvp rows are only touched after that lock is held — the same
- * order everywhere — so two writers can't deadlock by locking in opposite order.
- */
+// Every writer locks the event row (FOR UPDATE) before rsvp rows: no oversell, no deadlock.
 @Service
 @RequiredArgsConstructor
 public class RsvpServiceImpl implements RsvpService {
@@ -49,12 +42,7 @@ public class RsvpServiceImpl implements RsvpService {
     private final SeatCountPublisher seatCountPublisher;
     private final CurrentUser currentUser;
 
-    /**
-     * Two people clicking the last seat at the same instant: the second one
-     * blocks on the lock until the first commits, then counts the seat the
-     * first one took and is WAITLISTED — not an error. That queueing is the
-     * feature; 409 is only for someone who already holds a place.
-     */
+    // A last-seat race loser blocks on the lock, then is WAITLISTED, not an error.
     @Override
     @Transactional
     public RsvpResponseDto createRsvp(Long eventId) {
@@ -66,9 +54,7 @@ public class RsvpServiceImpl implements RsvpService {
         }
         validateIsUpcoming(event);
 
-        // At most one row per (user, event) — a cancelled RSVP keeps its row
-        // for history, and re-RSVPing reuses it instead of breaking the
-        // unique constraint.
+        // Re-RSVP reuses the cancelled row because of UNIQUE(user_id, event_id).
         Optional<Rsvp> existing = rsvpDao.findByEventIdAndUserId(eventId, userId);
         if (existing.isPresent() && existing.get().getStatus().isActive()) {
             throw new ConflictException(RsvpMessageKey.ALREADY_EXISTS);
@@ -85,17 +71,11 @@ public class RsvpServiceImpl implements RsvpService {
         }
 
         Rsvp saved = rsvpDao.save(rsvp);
-        // Waitlisted too: the confirmed count doesn't move, but every viewer
-        // should still see an update rather than infer that nothing happened.
+        // Published even when waitlisted, so every viewer still sees an update.
         seatCountPublisher.publishChange(event);
         return rsvpMapper.toResponseDto(saved);
     }
 
-    /**
-     * The cancelled row stays, as CANCELLED, so history survives. Whatever it
-     * freed — a seat, or a place in the queue — is then rebalanced under the
-     * same lock: a seat goes to whoever is first, and the queue closes up.
-     */
     @Override
     @Transactional
     public RsvpResponseDto cancelRsvp(Long eventId) {
@@ -135,7 +115,6 @@ public class RsvpServiceImpl implements RsvpService {
                 .toList();
     }
 
-    // Active only: a cancelled RSVP is history, not something to show as "mine".
     @Override
     @Transactional(readOnly = true)
     public List<MyRsvpResponseDto> getMyRsvps() {
@@ -150,8 +129,6 @@ public class RsvpServiceImpl implements RsvpService {
                 .orElseThrow(() -> new EntityNotFoundException(EventMessageKey.NOT_FOUND));
     }
 
-    // The shared ownership guard from common/ — the same check EventServiceImpl
-    // uses for updates, with the same key, since the rule is the same rule.
     private Event findOrganisersEventOrThrow(Long eventId) {
         Event event = eventDao.findByIdAndIsDeletedFalse(eventId)
                 .orElseThrow(() -> new EntityNotFoundException(EventMessageKey.NOT_FOUND));
@@ -165,13 +142,12 @@ public class RsvpServiceImpl implements RsvpService {
         }
     }
 
-    // The queue is kept contiguous (1..n) by WaitlistManager, so the next
-    // place is always one past its length.
+    // WaitlistManager keeps the queue contiguous (1..n), so the next place is length + 1.
     private int nextWaitlistPosition(Long eventId) {
         return Math.toIntExact(rsvpDao.countByEventIdAndStatus(eventId, RsvpStatus.WAITLISTED)) + FIRST_POSITION;
     }
 
-    // A reference, not a load: the user is only needed as the foreign key.
+    // getReferenceById avoids a SELECT: only the user's FK is needed.
     private Rsvp newRsvp(Event event, Long userId) {
         Rsvp rsvp = new Rsvp();
         rsvp.setEvent(event);

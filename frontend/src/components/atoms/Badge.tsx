@@ -12,7 +12,6 @@ export type BadgeVariant =
   | "ONLINE"
   | "PHYSICAL";
 
-/** Tinted, never filled yellow - a badge labels, it isn't a call to action. */
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   UPCOMING: "bg-yellow-50 text-yellow-700",
   CANCELLED: "bg-red-50 text-red-600",

@@ -1,6 +1,5 @@
 package com.seatly.backend.auth.type;
 
-/** Single source of every auth message key string — same pattern as EventMessageKeys. */
 public interface AuthMessageKeys {
 
     String EMAIL_ALREADY_REGISTERED = "AUTH_ERROR_EMAIL_ALREADY_REGISTERED";

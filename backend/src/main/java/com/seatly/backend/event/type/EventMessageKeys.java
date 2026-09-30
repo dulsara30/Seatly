@@ -1,10 +1,5 @@
 package com.seatly.backend.event.type;
 
-/**
- * The single source of every event message key string. Bean Validation
- * annotations need compile-time constants, so they reference these directly;
- * EventMessageKey reads the same constants, so a key is only ever spelled once.
- */
 public interface EventMessageKeys {
 
     String NOT_FOUND = "EVENT_ERROR_NOT_FOUND";

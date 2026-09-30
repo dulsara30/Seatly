@@ -24,7 +24,6 @@ class ListEventsIntegrationTest extends AbstractIntegrationTest {
 
     private long laterEventId;
 
-    // Two listable events, plus one cancelled and one deleted that must never appear.
     @BeforeEach
     void arrangeEvents() {
         testData.insertEvent(TestData.SEEDED_ORGANISER_ID, SOONER, EventMode.ONLINE, EventStatus.UPCOMING, 20,
@@ -49,8 +48,7 @@ class ListEventsIntegrationTest extends AbstractIntegrationTest {
         assertThat(result).bodyJson().extractingPath("$.results[0].totalItems").isEqualTo(2);
     }
 
-    // The grouped count returns no row for an event with no confirmed RSVPs;
-    // that event must still show every seat as available.
+    // The grouped count has no row for an event without confirmed RSVPs; it must still show all seats.
     @Test
     void derivesAvailableSeatsPerEventFromOneGroupedCount() {
         testData.insertRsvps(laterEventId, RsvpStatus.CONFIRMED, 3);
@@ -92,7 +90,6 @@ class ListEventsIntegrationTest extends AbstractIntegrationTest {
                 .bodyJson().extractingPath(ITEM_NAMES).asArray().containsExactly("100% Remote");
     }
 
-    // An empty query parameter is trimmed to null — "no filter", not "tag ''".
     @Test
     void ignoresEmptyTagParameter() {
         assertThat(mvc.get().uri(EVENTS_PATH).param("tag", "").exchange())

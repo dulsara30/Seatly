@@ -16,11 +16,7 @@ interface HeaderBarProps {
   onSignOut: () => void;
 }
 
-/**
- * The design's Attendee/Organiser switch isn't here on purpose: with real
- * accounts, organiser is per event (you organise yours, attend others'), so
- * both views are simply links for anyone signed in.
- */
+// No Attendee/Organiser switch: organiser is per event, so both views are links for everyone.
 export function HeaderBar({ user, isLoading, currentPath, isSigningOut, onSignOut }: HeaderBarProps) {
   const links = [
     { href: Routes.home, label: Copy.nav.browse },

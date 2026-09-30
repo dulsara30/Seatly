@@ -1,16 +1,6 @@
 import { BackendPaths } from "@/api/utils/BackendPaths";
 import type { Id } from "@/types/entities/primitives";
 
-/**
- * Every URL the browser calls, relative to axiosInstance's baseURL (/api).
- *
- * Two kinds:
- *  - Next's own auth routes (login, logout, session). They exist because the
- *    token lives in an httpOnly cookie that only the Next server can set or read.
- *  - Everything else, reached through the proxy route, which attaches the
- *    token from that cookie and forwards to Spring.
- */
-/** axiosInstance's baseURL - every browser call is same-origin, into Next. */
 export const API_BASE_PATH = "/api";
 
 const PROXY = "/proxy";
@@ -39,10 +29,6 @@ export const ApiEndpoints = {
   },
 } as const;
 
-/**
- * EventSource is the browser's own client — it doesn't go through axios, so
- * it needs the full same-origin URL, baseURL included. Through the proxy like
- * everything else: no CORS, and the browser still never learns Spring's address.
- */
+// EventSource bypasses axios, so this URL must include the /api base path itself.
 export const eventSeatStreamUrl = (eventId: Id) =>
   `${API_BASE_PATH}${viaProxy(BackendPaths.events.stream(eventId))}`;

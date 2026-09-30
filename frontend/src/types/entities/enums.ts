@@ -1,9 +1,3 @@
-/**
- * Mirrors of the backend enums. Each is a const object AND a type of the same
- * name, so code writes EventMode.ONLINE rather than the string "ONLINE", and
- * the type only admits the values the backend can actually send.
- */
-
 // event/type/EventMode.java
 export const EventMode = {
   ONLINE: "ONLINE",

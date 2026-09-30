@@ -21,21 +21,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/**
- * The reason RSVP creation takes SELECT ... FOR UPDATE on the event row.
- *
- * Without the lock, two transactions can both count "one seat left" before
- * either inserts, and both confirm: the event is oversold. With it, the second
- * transaction waits for the first to commit, counts again, and is waitlisted.
- *
- * Real concurrency, not a simulation: separate threads, each its own HTTP
- * request, its own transaction and its own database connection, released
- * together by a barrier so they genuinely overlap.
- */
 class RsvpConcurrencyIntegrationTest extends AbstractIntegrationTest {
 
-    // A race can be won by luck once. Repeating it with fresh data makes a
-    // missing lock show up as a failure instead of a lucky pass.
+    // A race can be won by luck once; repeating it makes a missing lock fail reliably.
     private static final int ROUNDS = 20;
     private static final int CROWD_SIZE = 8;
     private static final long TIMEOUT_SECONDS = 30;
@@ -56,8 +44,6 @@ class RsvpConcurrencyIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
-    // A crowd for one seat: exactly one winner, and the losers queue in a
-    // contiguous 1..n — no two people holding the same place in line.
     @Test
     void crowdRacingForOneSeatGetsOneWinnerAndAnOrderlyQueue() throws Exception {
         long eventId = eventWithSeatLimit(1);
@@ -76,11 +62,7 @@ class RsvpConcurrencyIntegrationTest extends AbstractIntegrationTest {
                 EventStatus.UPCOMING, seatLimit, NOW.plusWeeks(1));
     }
 
-    /**
-     * Every thread is created and has its token before the barrier; the
-     * barrier then releases them all at once, so the requests overlap instead
-     * of running one after another as they were submitted.
-     */
+    // The barrier releases every thread at once so the requests genuinely overlap.
     private List<MvcTestResult> rsvpSimultaneously(long eventId, List<Long> userIds) throws Exception {
         List<String> tokens = userIds.stream().map(this::bearerTokenFor).toList();
         CyclicBarrier startingLine = new CyclicBarrier(tokens.size());

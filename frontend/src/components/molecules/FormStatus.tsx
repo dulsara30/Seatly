@@ -1,4 +1,3 @@
-/** A form-level error - one not tied to any single field, e.g. wrong credentials. */
 export function FormStatus({ message }: { message: string | undefined }) {
   if (!message) {
     return null;

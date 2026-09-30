@@ -10,10 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Lookup table — deliberately not Auditable (see CLAUDE.md Part 2). The tag
- * module (service, controller, lowercasing) builds on this later.
- */
 @Entity
 @Table(name = "tag")
 @Getter

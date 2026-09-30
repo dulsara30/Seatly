@@ -8,10 +8,7 @@ import {
 } from "@/server/backend";
 import type { SessionResponse } from "@/types/responses/AuthResponse";
 
-/**
- * Tokens are stateless, so Spring has nothing to revoke - logging out means
- * deleting the cookie that holds the token. Only the server can: it's httpOnly.
- */
+// Tokens are stateless, so logging out is just deleting the httpOnly cookie.
 export async function POST(request: NextRequest) {
   if (!isAllowedOrigin(request)) {
     return errorResponse(HttpStatus.FORBIDDEN, "ACCESS_DENIED");

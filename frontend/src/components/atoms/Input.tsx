@@ -7,7 +7,6 @@ import { classNames } from "@/utils/classNames";
 
 interface FieldProps {
   label: string;
-  /** Shown only when set - the form decides when (e.g. after the field is touched). */
   error?: string;
   hint?: string;
 }
@@ -22,11 +21,6 @@ const CONTROL_CLASSES =
   "w-full rounded-md border bg-white px-3 text-body-m text-black placeholder:text-gray-400 " +
   "transition-colors duration-150 focus:border-black focus:outline-none disabled:bg-gray-50 disabled:text-gray-400";
 
-/**
- * Label, control and error in one - so every field gets the same spacing,
- * and the error is always wired to the control for screen readers.
- * Spread Formik's getFieldProps(name) straight into it.
- */
 export function Input(props: InputProps) {
   const generatedId = useId();
   const {

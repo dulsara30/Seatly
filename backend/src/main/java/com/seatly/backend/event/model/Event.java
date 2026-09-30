@@ -48,8 +48,7 @@ public class Event extends Auditable {
     @Column(name = "description", nullable = false)
     private String description;
 
-    // STRING, never ORDINAL: an ordinal stores the enum's position, so
-    // reordering or inserting a constant silently remaps every existing row.
+    // STRING, not ORDINAL: reordering the enum would silently remap every stored row.
     @Enumerated(EnumType.STRING)
     @Column(name = "mode", nullable = false, length = 20)
     private EventMode mode;
@@ -76,9 +75,7 @@ public class Event extends Auditable {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
-    // Loaded lazily, but in batches: touching one event's tags loads the tags
-    // for every event of the page in a single IN query. A fetch join can't be
-    // used for this on a paged query — Hibernate would page in memory.
+    // @BatchSize, not a fetch join: fetch-joining a collection makes Hibernate page in memory.
     @ManyToMany
     @BatchSize(size = PaginationConstants.MAX_PAGE_SIZE)
     @JoinTable(

@@ -12,9 +12,7 @@ public interface UserMapper {
 
     UserResponseDto toResponseDto(User user);
 
-    // email is normalised and password hashed by the service; the flags and
-    // id belong to the database. Mapping the raw password here would put
-    // plain text into the entity even briefly.
+    // The service sets email and the hash; mapping the raw password would put plain text in the entity.
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)

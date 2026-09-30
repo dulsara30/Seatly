@@ -43,8 +43,6 @@ class CreateEventIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.BAD_REQUEST, EventMessageKeys.DATE_MUST_BE_FUTURE);
     }
 
-    // The boundary: "in the future" is strictly after now. Only testable
-    // because the Clock is frozen — with a live clock "now" has already moved.
     @Test
     void rejectsEventDateExactlyNow() {
         assertError(post(EVENTS_PATH, physicalEvent(NOW, Set.of())),
@@ -72,7 +70,6 @@ class CreateEventIntegrationTest extends AbstractIntegrationTest {
         assertError(post(EVENTS_PATH, request), HttpStatus.BAD_REQUEST, EventMessageKeys.LOCATION_REQUIRED);
     }
 
-    // Sending both venue fields is accepted, but only the one the mode uses is kept.
     @Test
     void dropsLocationWhenCreatingOnlineEvent() {
         CreateEventRequestDto request = new CreateEventRequestDto("Online Talk", "Description", EventMode.ONLINE,
@@ -92,8 +89,6 @@ class CreateEventIntegrationTest extends AbstractIntegrationTest {
         assertError(post(EVENTS_PATH, physicalEvent(NEXT_WEEK, Set.of(unknownTagId))),
                 HttpStatus.BAD_REQUEST, EventMessageKeys.TAG_NOT_FOUND);
     }
-
-    // Shape validation — the DTO's job, surfaced through the same envelope.
 
     @Test
     void rejectsBlankName() {
@@ -121,8 +116,7 @@ class CreateEventIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void rejectsMalformedJson() {
-        // Authenticated: security runs before the body is parsed, so without a
-        // token this would be a 401 and never reach the JSON check.
+        // Authenticated, else security returns 401 before the JSON is ever parsed.
         MvcTestResult result = mvc.post().uri(EVENTS_PATH)
                 .header(HttpHeaders.AUTHORIZATION, bearerTokenFor(TestData.SEEDED_ORGANISER_ID))
                 .contentType(MediaType.APPLICATION_JSON).content("{ not json").exchange();

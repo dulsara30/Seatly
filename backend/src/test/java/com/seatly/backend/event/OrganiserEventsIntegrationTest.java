@@ -16,15 +16,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/** GET /v1/events/my and POST /v1/events/{id}/cancel — the organiser's dashboard and danger zone. */
 class OrganiserEventsIntegrationTest extends AbstractIntegrationTest {
 
     private static final String MY_EVENTS_PATH = "/v1/events/my";
     private static final String CANCEL_PATH = "/v1/events/{eventId}/cancel";
     private static final String MY_RSVPS_PATH = "/v1/rsvps/my";
     private static final int SEAT_LIMIT = 10;
-
-    // ---- my events ----
 
     @Test
     void listsOnlyTheCallersEventsInEveryStatusSoonestFirst() {
@@ -51,16 +48,12 @@ class OrganiserEventsIntegrationTest extends AbstractIntegrationTest {
                 .bodyJson().extractingPath("$.results[0].availableSeats").isEqualTo(SEAT_LIMIT - 4);
     }
 
-    // /v1/events/my is one path segment, so the public "GET /v1/events/*"
-    // rule matches it too. This is what listing it first in SecurityConfig
-    // protects — and it must be a 401, not a 400 from parsing "my" as an id.
+    // Public "GET /v1/events/*" also matches /my; SecurityConfig lists /my first so it's 401, not 400.
     @Test
     void requiresTokenEvenThoughEventDetailIsPublic() {
         assertError(mvc.get().uri(MY_EVENTS_PATH).exchange(),
                 HttpStatus.UNAUTHORIZED, CommonMessageKeys.AUTHENTICATION_REQUIRED);
     }
-
-    // ---- cancel ----
 
     @Test
     void organiserCancelsTheirEvent() {
@@ -81,8 +74,6 @@ class OrganiserEventsIntegrationTest extends AbstractIntegrationTest {
         assertError(rsvpAs(eventId, testData.insertUser()), HttpStatus.BAD_REQUEST, RsvpMessageKeys.EVENT_NOT_UPCOMING);
     }
 
-    // RSVP rows are kept (they're who to notify), so an attendee's list must
-    // say the event is cancelled rather than still showing "Confirmed".
     @Test
     void attendeeSeesTheCancellationOnTheirRsvps() {
         long eventId = insertOwnEvent("To Cancel", EventStatus.UPCOMING, 5);

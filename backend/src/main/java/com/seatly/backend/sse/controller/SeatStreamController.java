@@ -20,17 +20,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Tag(name = "Live seats", description = "Server-Sent Events: seat counts as they change")
 public class SeatStreamController {
 
-    // Nginx buffers proxied responses by default, which holds SSE messages
-    // back until the buffer fills — so the events would simply never arrive.
+    // Nginx buffers proxied responses by default, so SSE messages would never arrive.
     private static final String X_ACCEL_BUFFERING = "X-Accel-Buffering";
     private static final String NO_BUFFERING = "no";
 
     private final SeatStreamService seatStreamService;
 
-    /**
-     * Public, like the event itself: it carries only counts, no personal data.
-     * no-transform stops gzip (in Next, or a CDN) from buffering the stream.
-     */
     @GetMapping(value = ApiPaths.EVENT_STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "Stream seat counts",
             description = "Sends the current counts immediately, then an event: seat-update on every change. "
@@ -38,6 +33,7 @@ public class SeatStreamController {
     @ApiResponse(responseCode = ApiResponseCodes.OK, description = "A text/event-stream of seat-update events")
     @ApiResponse(responseCode = ApiResponseCodes.NOT_FOUND, description = "No such event, or it was deleted")
     public ResponseEntity<SseEmitter> streamSeats(@PathVariable Long eventId) {
+        // no-transform stops gzip (in Next, or a CDN) from buffering the stream.
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noCache().noTransform())
                 .header(X_ACCEL_BUFFERING, NO_BUFFERING)

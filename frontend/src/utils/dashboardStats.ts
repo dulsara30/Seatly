@@ -11,13 +11,7 @@ export interface DashboardStats {
   upcomingThisWeek: number;
 }
 
-/**
- * The four dashboard numbers, derived from the organiser's own events.
- *
- * The design's fourth card is "People on waitlists", but no event response
- * carries a waitlist count - it would take one request per event to find
- * out. "Open seats" is shown instead, until the backend adds the count.
- */
+// No response carries a waitlist count, so the fourth card shows open seats instead.
 export function dashboardStatsOf(
   events: EventResponse[],
   now: Date = new Date(),

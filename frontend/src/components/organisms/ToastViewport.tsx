@@ -3,7 +3,6 @@
 import { Toast } from "@/components/molecules/Toast";
 import { useToastStore } from "@/store/toastStore";
 
-/** Where toasts appear: bottom-centre on phones, bottom-right from sm up. */
 export function ToastViewport() {
   const toasts = useToastStore((state) => state.toasts);
   const dismiss = useToastStore((state) => state.dismiss);

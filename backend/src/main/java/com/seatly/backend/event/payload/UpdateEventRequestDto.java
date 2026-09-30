@@ -9,12 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-/**
- * Partial update: a null field means "leave unchanged". There are no
- * required-field constraints for that reason — @Size and @Min skip nulls, so
- * they only check the fields actually sent. An empty tagIds set means "remove
- * every tag", which is different from omitting it.
- */
+// Partial update: null = unchanged (so no required-field rules); empty tagIds removes all tags.
 public record UpdateEventRequestDto(
 
         @Size(max = EventFieldLimits.NAME_MAX_LENGTH, message = EventMessageKeys.NAME_TOO_LONG)

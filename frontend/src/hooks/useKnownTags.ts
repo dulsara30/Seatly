@@ -4,17 +4,8 @@ import type { Tag } from "@/types/entities/Tag";
 
 const NO_FILTERS = {};
 
-/**
- * Every tag in use on the upcoming events loaded so far.
- *
- * TODO(backend): GET /v1/tags doesn't exist yet - it's in the API design but
- * was never built. Until it is, the tag list is DERIVED from the unfiltered
- * events query, which means a tag only used by events past the loaded pages
- * won't appear. Swap this for a real useTags() hook once the endpoint exists.
- *
- * It reads the UNFILTERED query on purpose: deriving from the filtered one
- * would make the chip list shrink to the active tag the moment you click it.
- */
+// TODO(backend): GET /v1/tags isn't built yet; tags derived from loaded events
+// Reads the UNFILTERED query so the chip list doesn't shrink to the active tag.
 export function useKnownTags(): Tag[] {
   const { data } = useUpcomingEvents(NO_FILTERS);
 

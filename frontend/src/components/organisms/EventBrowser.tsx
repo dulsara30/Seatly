@@ -19,7 +19,6 @@ import { useMyRsvpLookup } from "@/hooks/useMyRsvpLookup";
 import type { EventMode } from "@/types/entities/enums";
 import type { EventFilters } from "@/types/requests/EventRequests";
 
-/** 01 Browse - hero, search, grouped filters, the card grid. */
 export function EventBrowser() {
   const [search, setSearch] = useState("");
   const [mode, setMode] = useState<EventMode>();

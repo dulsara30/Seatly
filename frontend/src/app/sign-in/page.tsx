@@ -4,8 +4,7 @@ import { Copy } from "@/constants/copy";
 import { RETURN_TO_PARAM, Routes, withReturnTo } from "@/constants/routes";
 import { firstParam } from "@/utils/searchParams";
 
-// returnTo is read here, on the server, and passed down - so the form needs
-// no useSearchParams and no Suspense boundary around it.
+// returnTo is read on the server so the form needs no useSearchParams or Suspense.
 export default async function SignInPage({
   searchParams,
 }: PageProps<"/sign-in">) {

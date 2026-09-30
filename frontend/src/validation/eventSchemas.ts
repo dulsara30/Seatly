@@ -4,14 +4,7 @@ import { MESSAGES } from "@/constants/messages";
 import { EventMode } from "@/types/entities/enums";
 import { parseLocalDateTime } from "@/utils/dateTime";
 
-/**
- * Mirrors event/payload/CreateEventRequestDto.java - same limits, same keys.
- *
- * Two rules here are NOT Bean Validation on the backend but business rules
- * in EventServiceImpl: ONLINE needs a meeting link, PHYSICAL needs a venue,
- * and the date must be in the future. They're repeated for instant feedback
- * only; Spring still enforces all three, so this is UX, never the guarantee.
- */
+// Mirrors CreateEventRequestDto; mode/venue/future-date rules are UX only, Spring enforces them.
 export const createEventSchema = yup.object({
   name: yup
     .string()

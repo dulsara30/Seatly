@@ -36,8 +36,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.validationError(errors));
     }
 
-    // Constraints on @RequestParam / @PathVariable (e.g. page size bounds).
-    // Spring MVC validates those itself and raises this, not the exception above.
+    // @RequestParam/@PathVariable constraints raise this, not MethodArgumentNotValidException.
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<ResponseEntityDto<ResponseEntityDto.ErrorMessage>> handleHandlerMethodValidation(
             HandlerMethodValidationException ex) {
@@ -45,15 +44,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.errors(messages));
     }
 
-    // A parameter that can't be converted to its type: ?mode=online, /events/abc.
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ResponseEntityDto<ResponseEntityDto.ErrorMessage>> handleArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntityDto.error(CommonMessageKey.INVALID_PARAMETER));
     }
 
-    // Unparseable JSON, or a body value Jackson can't convert (unknown enum,
-    // badly formatted date). Never echo ex's message — it quotes the raw input.
+    // Never echo ex's message: it quotes the raw input.
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ResponseEntityDto<ResponseEntityDto.ErrorMessage>> handleMessageNotReadable(
             HttpMessageNotReadableException ex) {

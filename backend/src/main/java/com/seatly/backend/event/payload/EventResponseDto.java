@@ -7,10 +7,6 @@ import com.seatly.backend.user.payload.UserSummaryDto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * List-card shape. availableSeats is derived from a confirmed-RSVP count, not
- * stored on the event, so the service supplies it at mapping time.
- */
 public record EventResponseDto(
         Long id,
         String name,

@@ -12,19 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * The single place the waitlist changes shape. Called after anything that can
- * free a seat or open a gap in the queue — a confirmed attendee cancelling, a
- * waitlisted one leaving, the organiser raising the seat limit — so all three
- * share one promotion rule and one renumbering rule.
- *
- * The caller must already hold the event row's FOR UPDATE lock. That lock is
- * what makes "count confirmed, promote that many" safe: nothing else can
- * confirm or cancel on this event until the caller commits. MANDATORY makes
- * calling this outside a transaction an immediate error rather than a silent
- * race — it can't prove the lock is held, but it rules out the "no transaction
- * at all" mistake.
- */
 @Component
 @RequiredArgsConstructor
 public class WaitlistManager {
@@ -34,20 +21,18 @@ public class WaitlistManager {
     private final RsvpDao rsvpDao;
     private final SeatCountPublisher seatCountPublisher;
 
+    // MANDATORY: the caller must hold the event row lock; this at least rules out no transaction.
     @Transactional(propagation = Propagation.MANDATORY)
     public void rebalance(Event lockedEvent) {
         long freeSeats = SeatUtils.availableSeats(lockedEvent.getSeatLimit(),
                 rsvpDao.countByEventIdAndStatus(lockedEvent.getId(), RsvpStatus.CONFIRMED));
         List<Rsvp> queue = rsvpDao.findByEventIdAndStatusOrderByPositionAsc(lockedEvent.getId(), RsvpStatus.WAITLISTED);
 
-        // Never negative (a full event promotes nobody), never more than are waiting.
         int promotions = Math.clamp(freeSeats, 0, queue.size());
         queue.subList(0, promotions).forEach(this::confirm);
         renumber(queue.subList(promotions, queue.size()));
 
-        // Announced here, not only by the callers, so any future caller of
-        // rebalance can't promote people silently. Today's callers announce
-        // too; the duplicate carries identical counts, so it's harmless.
+        // Also published here so no caller can promote silently; the duplicate publish is harmless.
         if (promotions > 0) {
             seatCountPublisher.publishChange(lockedEvent);
         }
@@ -58,8 +43,6 @@ public class WaitlistManager {
         rsvp.setPosition(null);
     }
 
-    // Positions are rewritten from 1 rather than shifted by an offset, so the
-    // queue comes out contiguous whatever state it went in with.
     private void renumber(List<Rsvp> stillWaiting) {
         for (int index = 0; index < stillWaiting.size(); index++) {
             stillWaiting.get(index).setPosition(FIRST_POSITION + index);

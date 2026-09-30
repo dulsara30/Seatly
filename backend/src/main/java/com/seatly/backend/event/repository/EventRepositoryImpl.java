@@ -55,8 +55,7 @@ public class EventRepositoryImpl implements EventRepository {
                 .getResultList();
     }
 
-    // Built from a fresh root: predicates belong to the query that created
-    // them and cannot be reused across two CriteriaQuery instances.
+    // Fresh root: predicates can't be reused across two CriteriaQuery instances.
     private long countMatching(EventFilterDto filter) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -67,9 +66,6 @@ public class EventRepositoryImpl implements EventRepository {
         return entityManager.createQuery(query).getSingleResult();
     }
 
-    // Starts from the two predicates that always apply, and adds an optional
-    // one only when its filter value is present — so the array never holds a
-    // null, and "no filters" is simply the two base predicates.
     private Predicate[] buildPredicates(
             CriteriaBuilder builder, CriteriaQuery<?> query, Root<Event> event, EventFilterDto filter) {
         List<Predicate> predicates = new ArrayList<>();
@@ -88,8 +84,7 @@ public class EventRepositoryImpl implements EventRepository {
         return predicates.toArray(Predicate[]::new);
     }
 
-    // A subquery rather than a join on the main query: joining tags there
-    // would multiply rows per tag and skew both the page and the count.
+    // Subquery, not a join: joining tags would multiply rows and skew the page and the count.
     private Predicate hasTag(CriteriaBuilder builder, CriteriaQuery<?> query, Root<Event> event, String tagName) {
         Subquery<Long> taggedEventIds = query.subquery(Long.class);
         Root<Event> taggedEvent = taggedEventIds.from(Event.class);
@@ -105,7 +100,7 @@ public class EventRepositoryImpl implements EventRepository {
                 builder.like(builder.lower(event.get(Event_.description)), pattern, LIKE_ESCAPE));
     }
 
-    // Without this, a search for "100%" or "a_b" is read as a pattern, not text.
+    // Escape LIKE wildcards, or "100%" and "a_b" are read as patterns, not text.
     private String escapeLikeWildcards(String value) {
         return value.replace(LIKE_ESCAPE_TEXT, LIKE_ESCAPE_TEXT + LIKE_ESCAPE_TEXT)
                 .replace(LIKE_WILDCARD, LIKE_ESCAPE_TEXT + LIKE_WILDCARD)

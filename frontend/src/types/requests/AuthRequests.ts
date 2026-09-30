@@ -1,10 +1,10 @@
-/** auth/payload/LoginRequestDto.java */
+// auth/payload/LoginRequestDto.java
 export interface LoginRequest {
   email: string;
   password: string;
 }
 
-/** auth/payload/RegisterRequestDto.java */
+// auth/payload/RegisterRequestDto.java
 export interface RegisterRequest {
   name: string;
   email: string;

@@ -5,11 +5,6 @@ import {
   formatWeekday,
 } from "@/utils/dateTime";
 
-/**
- * The card's anchor instead of a cover photo: consistent on every card,
- * on-brand, and it carries real information. Yellow here is text on black -
- * a label, not a filled surface.
- */
 export function DateChip({ date }: { date: LocalDateTimeString }) {
   return (
     <time

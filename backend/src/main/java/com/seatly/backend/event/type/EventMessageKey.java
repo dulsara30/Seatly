@@ -2,12 +2,6 @@ package com.seatly.backend.event.type;
 
 import com.seatly.backend.common.type.MessageKey;
 
-/**
- * Every key the event module can return. The first group is thrown by the
- * service as typed exceptions; the second group surfaces through Bean
- * Validation on the request DTOs. Both are listed so the frontend has one
- * complete vocabulary to map to copy.
- */
 public enum EventMessageKey implements MessageKey {
 
     NOT_FOUND(EventMessageKeys.NOT_FOUND),

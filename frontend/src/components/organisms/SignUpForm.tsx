@@ -18,10 +18,7 @@ const INITIAL_VALUES: SignUpFormValues = {
   bio: "",
 };
 
-/**
- * Registration returns no token, so a new account is logged straight in with
- * the same credentials - one step for the user, two calls underneath.
- */
+// Registration returns no token, so the new account logs straight in with the same credentials.
 export function SignUpForm({ returnTo }: { returnTo: string | undefined }) {
   const router = useRouter();
   const register = useRegister();

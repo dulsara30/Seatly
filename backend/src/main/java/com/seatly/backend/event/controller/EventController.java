@@ -71,8 +71,7 @@ public class EventController {
         return ResponseEntity.ok(ResponseEntityDto.success(eventService.getUpcomingEvents(filter, page, size)));
     }
 
-    // A literal segment beats the {eventId} pattern in Spring's matching, so
-    // "/my" is never parsed as an id.
+    // A literal segment beats {eventId} in Spring's matching, so "/my" is never parsed as an id.
     @GetMapping("/my")
     @Operation(summary = "List my events", description = "Events the caller organises, every status, soonest first.")
     @ApiResponse(responseCode = ApiResponseCodes.OK, description = "The caller's events")

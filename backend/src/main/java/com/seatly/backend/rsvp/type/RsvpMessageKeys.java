@@ -1,6 +1,5 @@
 package com.seatly.backend.rsvp.type;
 
-/** Single source of every RSVP message key string — same pattern as EventMessageKeys. */
 public interface RsvpMessageKeys {
 
     String ALREADY_EXISTS = "RSVP_ERROR_ALREADY_EXISTS";

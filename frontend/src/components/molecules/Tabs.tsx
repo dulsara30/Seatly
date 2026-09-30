@@ -12,7 +12,6 @@ interface TabsProps<Id extends string> {
   onChange: (id: Id) => void;
 }
 
-/** Underlined tabs - black when active, like every other selected state that isn't the primary CTA. */
 export function Tabs<Id extends string>({
   label,
   tabs,

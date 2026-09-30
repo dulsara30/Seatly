@@ -3,7 +3,6 @@ import { initialsOf } from "@/utils/initials";
 
 export type AvatarSize = "small" | "medium" | "large";
 
-// small 28px · medium 36px · large 48px
 const SIZE_CLASSES: Record<AvatarSize, string> = {
   small: "size-7 text-overline",
   medium: "size-9 text-caption",

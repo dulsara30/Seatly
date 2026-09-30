@@ -19,10 +19,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Minimal mapping of rsvp so the event module can count confirmed seats. The
- * rsvp module (locking, waitlist, promotion) builds on this later.
- */
 @Entity
 @Table(name = "rsvp")
 @Getter

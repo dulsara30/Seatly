@@ -28,22 +28,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * A real stream, left open: the request goes async, and every message the
- * server pushes is written into its response as it's sent. The RSVPs that
- * should trigger a push are made from other threads, as a second browser would.
- *
- * Plain MockMvc rather than MockMvcTester, because the tester waits for an
- * async request to finish — and a stream, by design, never does.
- */
+// Plain MockMvc: MockMvcTester waits for async requests to finish, and a stream never does.
 class SeatStreamIntegrationTest extends AbstractIntegrationTest {
 
     private static final String STREAM_PATH = "/v1/events/{eventId}/stream";
     private static final String SEAT_UPDATE_EVENT_LINE = "event:seat-update";
     private static final String DATA_PREFIX = "data:";
-    // Generous on purpose: a passing test returns the moment its push arrives,
-    // so only a genuine failure ever waits this long — and a slow CI runner
-    // mustn't turn a delivered-but-late push into a false failure.
+    // Generous for slow CI; a passing test returns as soon as its push arrives.
     private static final Duration PUSH_TIMEOUT = Duration.ofSeconds(15);
     private static final Duration ACTION_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration POLL_INTERVAL = Duration.ofMillis(50);
@@ -66,8 +57,6 @@ class SeatStreamIntegrationTest extends AbstractIntegrationTest {
         assertThat(stream.getResponse().getHeader("X-Accel-Buffering")).isEqualTo("no");
     }
 
-    // The core case: someone else RSVPs, and a viewer already watching sees
-    // the seat count drop without asking for it.
     @Test
     void pushesTheNewCountWhenSomeoneElseRsvps() throws Exception {
         long eventId = eventWithSeatLimit(2);
@@ -79,8 +68,6 @@ class SeatStreamIntegrationTest extends AbstractIntegrationTest {
         awaitPush(stream, new SeatCountDto(eventId, 1, 1));
     }
 
-    // A waitlisted RSVP doesn't change the counts, but still announces — a
-    // viewer should see a fresh update, not infer that nothing happened.
     @Test
     void pushesEvenWhenTheRsvpIsWaitlisted() throws Exception {
         long eventId = eventWithSeatLimit(1);
@@ -105,8 +92,6 @@ class SeatStreamIntegrationTest extends AbstractIntegrationTest {
         awaitPush(stream, new SeatCountDto(eventId, 3, 0));
     }
 
-    // Raising the limit promotes from the waitlist: both the limit and the
-    // confirmed count move, and the viewer sees the result of both.
     @Test
     void pushesWhenARaisedSeatLimitPromotesTheWaitlist() throws Exception {
         long eventId = eventWithSeatLimit(1);
@@ -128,7 +113,7 @@ class SeatStreamIntegrationTest extends AbstractIntegrationTest {
         assertThat(result.getRequest().isAsyncStarted()).isFalse();
     }
 
-    // No Authorization header anywhere in this class: the stream is public.
+    // No Authorization header: the stream is public.
     private MvcResult openStream(long eventId) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.get(STREAM_PATH, eventId).header(HttpHeaders.ACCEPT, MediaType.TEXT_EVENT_STREAM_VALUE))
                 .andExpect(request().asyncStarted())
@@ -140,13 +125,13 @@ class SeatStreamIntegrationTest extends AbstractIntegrationTest {
                 EventStatus.UPCOMING, seatLimit, NOW.plusWeeks(1));
     }
 
+    // Acts as a second browser: its own request thread and transaction.
     private void inAnotherThread(Runnable action) throws Exception {
         try (ExecutorService thread = Executors.newSingleThreadExecutor()) {
             thread.submit(action).get(ACTION_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
         }
     }
 
-    /** Waits until the stream has carried exactly this payload. */
     private void awaitPush(MvcResult stream, SeatCountDto expected) throws InterruptedException {
         String expectedData = DATA_PREFIX + jsonMapper.writeValueAsString(expected);
         awaitUntil(stream, () -> body(stream).contains(expectedData),

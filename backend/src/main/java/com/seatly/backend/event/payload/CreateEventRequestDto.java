@@ -10,11 +10,6 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-/**
- * Shape validation only. Rules that depend on another field or on the current
- * time — ONLINE needs a meeting link, PHYSICAL needs a location, the date must
- * be in the future — are business validation and live in EventServiceImpl.
- */
 public record CreateEventRequestDto(
 
         @NotBlank(message = EventMessageKeys.NAME_REQUIRED)

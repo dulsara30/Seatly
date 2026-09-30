@@ -13,7 +13,7 @@ type RsvpPanelProps = Pick<
   "availableSeats" | "seatLimit" | "mode" | "meetingLink"
 > & {
   state: RsvpPanelState;
-  /** Shown beside the seat bar — e.g. a live-updates indicator. A slot, so the panel knows nothing of streams. */
+  // A slot, so the panel knows nothing of streams.
   seatStatus?: ReactNode;
   signInHref: string;
   manageHref: string;
@@ -22,10 +22,6 @@ type RsvpPanelProps = Pick<
   onCancel: () => void;
 };
 
-/**
- * The detail page's call to action. Presentational: which state it's in is
- * decided by rsvpPanelStateOf, and the parent owns the mutations.
- */
 export function RsvpPanel({
   state,
   availableSeats,
@@ -126,8 +122,7 @@ function PanelAction({
         </div>
       );
     case "OPEN":
-      // A free seat gets the one yellow CTA on the page; a full event's
-      // "Join waitlist" is black - still an action, but not the headline one.
+      // Only a free seat gets the yellow CTA; "Join waitlist" is black - an action, not the headline.
       return (
         <Button
           variant={isFull ? "primary" : "accent"}
@@ -140,7 +135,7 @@ function PanelAction({
   }
 }
 
-/** Visible only when the backend sent it - i.e. to the organiser and confirmed attendees. */
+// The backend sends this only to the organiser and confirmed attendees.
 function MeetingLinkRow({ meetingLink }: { meetingLink: string | null }) {
   if (meetingLink === null) {
     return (

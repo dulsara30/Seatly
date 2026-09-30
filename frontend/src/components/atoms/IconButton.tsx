@@ -4,12 +4,11 @@ import { classNames } from "@/utils/classNames";
 
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon: IconName;
-  /** Required: an icon alone says nothing to a screen reader. */
+  // Required: an icon alone says nothing to a screen reader.
   label: string;
   variant?: "outline" | "ghost";
 }
 
-/** 40px square. */
 export function IconButton({ icon, label, variant = "outline", className, type = "button", ...props }: IconButtonProps) {
   return (
     <button

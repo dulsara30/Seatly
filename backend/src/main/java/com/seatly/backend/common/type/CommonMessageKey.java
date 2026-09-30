@@ -1,10 +1,5 @@
 package com.seatly.backend.common.type;
 
-/**
- * Message keys for errors that originate outside any single module —
- * framework-level failures GlobalExceptionHandler catches directly, rather
- * than a ModuleException a service threw on purpose.
- */
 public enum CommonMessageKey implements MessageKey {
 
     AUTHENTICATION_REQUIRED(CommonMessageKeys.AUTHENTICATION_REQUIRED),

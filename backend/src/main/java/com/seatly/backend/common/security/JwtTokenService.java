@@ -12,14 +12,6 @@ import java.util.Optional;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 
-/**
- * Issues and verifies access tokens. HS256 with a key of at least 256 bits —
- * Keys.hmacShaKeyFor rejects anything shorter at startup, so a weak key fails
- * the boot instead of quietly signing tokens anyone could forge.
- *
- * Both issuing and verifying read the injected Clock, so expiry is testable
- * with a frozen clock rather than by waiting.
- */
 @Component
 public class JwtTokenService {
 
@@ -52,11 +44,6 @@ public class JwtTokenService {
                 .compact();
     }
 
-    /**
-     * Empty for any token that isn't one of ours and currently valid —
-     * malformed, wrong signature, wrong issuer or expired. The caller doesn't
-     * need to know which: every case means "not authenticated".
-     */
     public Optional<Long> parseUserId(String token) {
         try {
             return Optional.of(Long.valueOf(parser.parseSignedClaims(token).getPayload().getSubject()));

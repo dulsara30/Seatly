@@ -1,10 +1,4 @@
-/**
- * Every user-facing string that isn't a backend message (those are in
- * messages.ts). Components import from here; no sentence is ever typed at a
- * call site, so wording changes in one place.
- */
 export const Copy = {
-  // The logo is the word plus a yellow full stop - rendered by atoms/Logo.
   brand: {
     name: "seatly",
     mark: ".",
@@ -31,7 +25,6 @@ export const Copy = {
     browse: "Browse",
     myRsvps: "My RSVPs",
     dashboard: "Dashboard",
-    // One pair of words everywhere - URLs, buttons, links: sign in / sign up / sign out.
     signIn: "Sign in",
     signUp: "Sign up",
     signOut: "Sign out",
@@ -216,7 +209,7 @@ export const Copy = {
     apply: "Apply",
     promoteBanner:
       "Increase your seat limit to automatically promote people from the waitlist.",
-    // No count until it's known - "(0)" while loading would be a wrong number, not an unknown one.
+    // No count until it's known: "(0)" while loading would be a wrong number.
     confirmedTab: (count: number | undefined) =>
       count === undefined ? "Confirmed" : `Confirmed (${count})`,
     waitlistTab: (count: number | undefined) =>

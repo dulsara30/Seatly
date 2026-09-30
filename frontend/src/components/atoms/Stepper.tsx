@@ -15,7 +15,7 @@ const BUTTON_CLASSES =
   "flex size-10 items-center justify-center text-black transition-colors duration-150 hover:bg-gray-100 " +
   "disabled:cursor-not-allowed disabled:text-gray-300 focus-visible:outline-2 focus-visible:outline-black";
 
-/** − value + · the middle is a real number input, so 30 → 100 doesn't take seventy clicks. */
+// The middle is a real number input, so 30 → 100 doesn't take seventy clicks.
 export function Stepper({ label, value, onChange, min, decreaseLabel, increaseLabel }: StepperProps) {
   const id = useId();
 

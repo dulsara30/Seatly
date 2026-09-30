@@ -16,10 +16,7 @@ interface CancelEventDialogProps {
   onClose: () => void;
 }
 
-/**
- * 09 Cancel modal. Irreversible and it emails people, so it says exactly
- * who will be told, and the safe choice ("Keep event") is the default focus.
- */
+// Irreversible and it emails people, so "Keep event" gets the default focus.
 export function CancelEventDialog({ eventId, confirmedCount, open, onClose }: CancelEventDialogProps) {
   const router = useRouter();
   const cancelEvent = useCancelEvent();
