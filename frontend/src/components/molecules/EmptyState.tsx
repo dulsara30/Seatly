@@ -6,7 +6,6 @@ interface EmptyStateProps {
   action?: ReactNode;
 }
 
-/** Nothing to show is still something to say - a blank screen is a bug. */
 export function EmptyState({ title, body, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-gray-200 px-6 py-12 text-center">

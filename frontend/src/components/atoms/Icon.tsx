@@ -1,7 +1,5 @@
 import type { SVGProps } from "react";
 
-// Stroke paths on a 24×24 grid, drawn in currentColor so an icon takes the
-// text colour of wherever it sits.
 const PATHS = {
   lock: "M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z",
   more: "M5 12h.01M12 12h.01M19 12h.01",
@@ -19,7 +17,7 @@ interface IconProps extends Omit<SVGProps<SVGSVGElement>, "name"> {
   name: IconName;
 }
 
-/** Decorative by default (aria-hidden) - the control around it carries the label. */
+// aria-hidden by default: the control around it carries the label.
 export function Icon({ name, className = "size-4", ...props }: IconProps) {
   return (
     <svg

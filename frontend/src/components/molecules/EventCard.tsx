@@ -20,17 +20,12 @@ type EventCardProps = Pick<
   | "tags"
 > & {
   hostName: string;
-  /** The viewer's own RSVP, if any - shows GOING / WAITLISTED. */
   myRsvpStatus?: RsvpStatus;
-  /** Absent for the create-form preview, which isn't a real event yet. */
+  // Absent for the create-form preview, which isn't a real event yet.
   href?: string;
 };
 
-/**
- * The browse card. No cover image by design: the date chip anchors the card
- * and the seat bar is the second thing the eye lands on. Built from plain
- * fields (not a whole EventResponse) so the create form can preview a draft.
- */
+// Plain fields, not a whole EventResponse, so the create form can preview a draft.
 export function EventCard({
   hostName,
   myRsvpStatus,

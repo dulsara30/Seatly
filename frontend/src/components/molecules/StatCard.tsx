@@ -3,7 +3,6 @@ import { classNames } from "@/utils/classNames";
 interface StatCardProps {
   value: number;
   label: string;
-  /** One card per row may be accented - a tint and a border, never a yellow fill. */
   accent?: boolean;
 }
 

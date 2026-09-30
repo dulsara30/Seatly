@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.1.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>com.seatly</groupId>
 	<artifactId>backend</artifactId>
@@ -115,9 +115,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Integration tests run against a real Postgres in a throwaway container,
-		     the same engine and version as docker-compose.yml. Versions come from
-		     the Spring Boot BOM. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>
@@ -128,14 +125,12 @@
 			<artifactId>testcontainers-postgresql</artifactId>
 			<scope>test</scope>
 		</dependency>
-				<!-- MapStruct: entity <-> DTO mapping, generated at compile time -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 			<version>1.6.3</version>
 		</dependency>
 
-		<!-- JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -154,7 +149,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Swagger / OpenAPI UI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

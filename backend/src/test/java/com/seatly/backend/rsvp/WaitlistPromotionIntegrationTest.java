@@ -14,11 +14,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/**
- * Every way a seat or a place in the queue can open up, and that each one
- * leaves the queue promoted and renumbered the same way — they all go
- * through WaitlistManager.rebalance.
- */
 class WaitlistPromotionIntegrationTest extends AbstractIntegrationTest {
 
     private static final int SEAT_LIMIT = 2;
@@ -39,7 +34,6 @@ class WaitlistPromotionIntegrationTest extends AbstractIntegrationTest {
                 Map.entry(queue.get(1), 1), Map.entry(queue.get(2), 2));
     }
 
-    // Leaving the queue frees no seat — nobody is promoted, everyone behind moves up.
     @Test
     void leavingTheWaitlistMovesEveryoneBehindUpOne() {
         long eventId = event(EventMode.PHYSICAL);
@@ -53,7 +47,6 @@ class WaitlistPromotionIntegrationTest extends AbstractIntegrationTest {
                 Map.entry(queue.get(0), 1), Map.entry(queue.get(2), 2));
     }
 
-    // The part deferred in Layer 5: raising the limit now fills the new seats.
     @Test
     void raisingTheSeatLimitPromotesFromTheFrontOfTheQueue() {
         long eventId = event(EventMode.PHYSICAL);
@@ -81,8 +74,6 @@ class WaitlistPromotionIntegrationTest extends AbstractIntegrationTest {
         assertThat(testData.waitlistPositions(eventId)).isEmpty();
     }
 
-    // Promotion changes what the promoted person may see: the meeting link is
-    // a live permission check, so it appears the moment they are confirmed.
     @Test
     void promotedAttendeeCanNowSeeTheMeetingLink() {
         long eventId = event(EventMode.ONLINE);

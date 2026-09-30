@@ -1,8 +1,3 @@
-/**
- * Mirrors of the backend's field limits, so the forms reject exactly what
- * Spring would reject - before the request is sent.
- */
-
 // event/model/EventFieldLimits.java
 export const EventFieldLimits = {
   NAME_MAX_LENGTH: 255,
@@ -17,6 +12,6 @@ export const UserFieldLimits = {
   EMAIL_MAX_LENGTH: 255,
   BIO_MAX_LENGTH: 500,
   PASSWORD_MIN_LENGTH: 8,
-  /** BCrypt reads only the first 72 BYTES. Measured in UTF-8 bytes, not characters. */
+  // BCrypt reads only the first 72 BYTES (UTF-8), not characters.
   PASSWORD_MAX_BYTES: 72,
 } as const;

@@ -41,11 +41,7 @@ const register = async (request: RegisterRequest): Promise<User> =>
     ),
   );
 
-/**
- * Who is logged in - the single source of truth for the current user. The
- * user is server state, so it lives in this query, not in a Zustand store:
- * a copy there would be a second source of truth that goes stale.
- */
+// Server state: kept in this query, not Zustand, so there's one source of truth.
 export const useSession = () =>
   useQuery({
     queryKey: QueryKeys.auth.session,
@@ -58,8 +54,7 @@ export const useLogin = () => {
     mutationFn: login,
     onSuccess: (session) => {
       queryClient.setQueryData(QueryKeys.auth.session, session);
-      // What an event shows depends on who is asking (meetingLink), so
-      // anything fetched while logged out is now out of date.
+      // Event responses depend on who's asking (meetingLink), so logged-out fetches are stale.
       void queryClient.invalidateQueries({ queryKey: QueryKeys.events.all });
     },
   });
@@ -70,12 +65,11 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: logout,
     onSuccess: (session) => {
-      // Everything cached belonged to the user who just left.
       queryClient.clear();
       queryClient.setQueryData(QueryKeys.auth.session, session);
     },
   });
 };
 
-/** Creates the account only - it does not log in. Registration returns no token. */
+// Registration returns no token, so this does not log in.
 export const useRegister = () => useMutation({ mutationFn: register });

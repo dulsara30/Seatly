@@ -19,28 +19,13 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Full stack: HTTP (MockMvc, no port needed) -> security filter chain ->
- * controller -> service -> Postgres. Every subclass shares one application
- * context and one container.
- *
- * Deliberately NOT @Transactional. A test transaction would make every
- * request share one Hibernate session — a GET after a PATCH could read the
- * cached entity instead of the database, and a failed request's rollback
- * would be invisible. Each request here runs in its own real transaction,
- * exactly as in production, and reset() isolates tests instead.
- *
- * Requests go through the real JWT filter with real tokens. The helpers
- * without a suffix act as the seeded organiser — most event tests are about
- * the rules, not about who is calling — and the ...As / ...Anonymously
- * variants make any other caller explicit.
- */
+// Not @Transactional: a shared session masks DB reads and rollbacks, and AFTER_COMMIT never fires.
 @SpringBootTest(properties = "seatly.jwt.signing-key=" + AbstractIntegrationTest.TEST_SIGNING_KEY)
 @AutoConfigureMockMvc
 @Import({TestcontainersConfiguration.class, FixedClockConfiguration.class})
 public abstract class AbstractIntegrationTest {
 
-    /** Test-only key (32 random bytes, Base64). Never used outside tests; CI needs no secret. */
+    // Test-only key, so CI needs no secret.
     public static final String TEST_SIGNING_KEY = "vXu9mWI6wkifjIt+v+OvFWIXj9o1gckQPfFkCP6Lv5s=";
 
     protected static final String EVENTS_PATH = "/v1/events";
@@ -73,7 +58,6 @@ public abstract class AbstractIntegrationTest {
         return jsonMapper.writeValueAsString(body);
     }
 
-    /** Reads one value out of a response, for when a test needs it as input to the next request. */
     protected <T> T readJson(MvcTestResult result, String jsonPath) {
         return JsonPath.read(new String(result.getResponse().getContentAsByteArray(), StandardCharsets.UTF_8), jsonPath);
     }
@@ -104,8 +88,6 @@ public abstract class AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON).content(toJson(body)).exchange();
     }
 
-    // RSVP endpoints take no body — the event is in the path, the caller in the token.
-
     protected MvcTestResult rsvpAs(long eventId, long userId) {
         return mvc.post().uri(RSVP_PATH, eventId).header(HttpHeaders.AUTHORIZATION, bearerTokenFor(userId)).exchange();
     }
@@ -131,7 +113,6 @@ public abstract class AbstractIntegrationTest {
         return mvc.get().uri(EVENT_PATH, eventId).exchange();
     }
 
-    /** The error envelope: unsuccessful, exactly one message, the expected key. */
     protected void assertError(MvcTestResult result, HttpStatus status, String messageKey) {
         assertThat(result).hasStatus(status);
         assertThat(result).bodyJson().extractingPath("$.status").isEqualTo(ResponseStatusType.UNSUCCESSFUL.getValue());

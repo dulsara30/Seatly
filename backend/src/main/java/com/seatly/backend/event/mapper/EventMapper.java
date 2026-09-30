@@ -16,28 +16,16 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
-/**
- * Field-for-field only. availableSeats arrives as a second source parameter —
- * MapStruct binds it to the target field of the same name — so the service
- * owns the count and the mapper never computes anything.
- *
- * unmappedTargetPolicy = ERROR: a new field on a DTO or entity that nobody
- * mapped fails the build instead of silently arriving as null.
- */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface EventMapper {
 
     EventResponseDto toResponseDto(Event event, long availableSeats);
 
-    /** For the organiser and currently-confirmed attendees. */
     EventDetailResponseDto toDetailResponseDto(Event event, long availableSeats);
 
-    /** For everyone else — identical, except the meeting link is withheld. */
     @Mapping(target = "meetingLink", ignore = true)
     EventDetailResponseDto toDetailResponseDtoWithoutMeetingLink(Event event, long availableSeats);
 
-    // Everything ignored here is owned by the service (organizer, status,
-    // tags resolved from tagIds) or by the database (id, deleted, linkSentAt).
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "organizer", ignore = true)
     @Mapping(target = "status", ignore = true)
@@ -46,7 +34,6 @@ public interface EventMapper {
     @Mapping(target = "deleted", ignore = true)
     Event toEntity(CreateEventRequestDto request);
 
-    // IGNORE: a null field in a PATCH body means "leave unchanged".
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "organizer", ignore = true)

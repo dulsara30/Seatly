@@ -16,12 +16,7 @@ public class OpenApiConfig {
     private static final String JWT_FORMAT = "JWT";
     private static final String BEARER = "bearer";
 
-    /**
-     * The security requirement is applied globally rather than per endpoint so
-     * Swagger sends the token on every call once you click Authorize. That
-     * matters for the public GET /v1/events/{id} too: it works without a token,
-     * but only shows meetingLink when the organiser's token is attached.
-     */
+    // Global so Swagger also sends the token on public GETs (meetingLink needs the organiser's token).
     @Bean
     public OpenAPI seatlyOpenApi() {
         return new OpenAPI()

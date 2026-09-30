@@ -4,24 +4,10 @@ import type {
   ApiErrorEnvelope,
 } from "@/types/responses/ApiEnvelope";
 
-/**
- * Where the { status, results } envelope is removed - once, in the API
- * layer, so hooks and components only ever hold payload types.
- *
- * Deliberately NOT in an axios response interceptor. An interceptor that
- * swaps response.data for results[0] makes axios's own types wrong: the call
- * site would still see AxiosResponse<ApiEnvelope<Event>> while holding an
- * Event. Here the types change exactly where the value changes.
- *
- * The backend uses the envelope two ways, so there are two unwrappers:
- *  - one object in results (most endpoints)
- *  - the list IS results (waitlist, my RSVPs)
- */
-
+// Unwrapped in the API layer, not an axios interceptor, which would make axios's types lie.
 export function unwrapOne<T>(response: AxiosResponse<ApiEnvelope<T>>): T {
   const { results } = response.data;
   const [only] = results;
-  // A contract violation, not a user error - surface it loudly.
   if (results.length !== 1 || only === undefined) {
     throw new Error(
       `Expected exactly one result from ${response.config.url}, got ${results.length}`,
@@ -30,11 +16,12 @@ export function unwrapOne<T>(response: AxiosResponse<ApiEnvelope<T>>): T {
   return only;
 }
 
+// For endpoints where the list IS results (waitlist, my RSVPs).
 export function unwrapMany<T>(response: AxiosResponse<ApiEnvelope<T>>): T[] {
   return response.data.results;
 }
 
-/** An error body is only trusted as our envelope if it actually has the shape. */
+// Trust a body as our error envelope only if it really has that shape.
 export function isErrorEnvelope(body: unknown): body is ApiErrorEnvelope {
   return (
     typeof body === "object" &&

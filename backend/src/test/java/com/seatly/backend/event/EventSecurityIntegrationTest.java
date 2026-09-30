@@ -20,10 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
-/**
- * Who may call what on /v1/events, and that the caller really comes from the
- * token now — not from a hardcoded id.
- */
 class EventSecurityIntegrationTest extends AbstractIntegrationTest {
 
     private static final int SEAT_LIMIT = 10;
@@ -38,8 +34,6 @@ class EventSecurityIntegrationTest extends AbstractIntegrationTest {
         assertThat(getAnonymously(organisersEvent(EventMode.PHYSICAL))).hasStatusOk();
     }
 
-    // Public to read — but the meeting link is still only for the organiser
-    // and confirmed attendees, and an anonymous visitor is neither.
     @Test
     void hidesMeetingLinkFromAnonymousVisitor() {
         long eventId = organisersEvent(EventMode.ONLINE);
@@ -54,8 +48,6 @@ class EventSecurityIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.UNAUTHORIZED, CommonMessageKeys.AUTHENTICATION_REQUIRED);
     }
 
-    // A bad token is ignored, not trusted — on a protected endpoint that
-    // leaves the request unauthenticated, so it's a 401 like no token at all.
     @Test
     void rejectsCreateWithInvalidToken() {
         MvcTestResult result = mvc.post().uri(EVENTS_PATH).header(HttpHeaders.AUTHORIZATION, "Bearer not-a-jwt")
@@ -73,9 +65,6 @@ class EventSecurityIntegrationTest extends AbstractIntegrationTest {
         assertError(result, HttpStatus.UNAUTHORIZED, CommonMessageKeys.AUTHENTICATION_REQUIRED);
     }
 
-    // The end-to-end proof that CURRENT_USER_ID is gone: a brand-new account,
-    // logged in over HTTP, becomes the organiser of what it creates — and the
-    // seeded organiser (the old hardcoded id 1) is then locked out of it.
     @Test
     void makesTheTokensUserTheOrganiser() {
         postAnonymously("/v1/auth/register",

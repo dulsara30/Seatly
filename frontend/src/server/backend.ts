@@ -12,7 +12,7 @@ const SAFE_METHODS = new Set(["GET", "HEAD"]);
 
 export const JSON_CONTENT_TYPE = "application/json";
 
-/** A request from the Next server to Spring. Never cached: every answer is per-user. */
+// Never cached: every answer is per-user.
 export function callBackend(
   backendPath: string,
   init: RequestInit,
@@ -24,17 +24,7 @@ export function callBackend(
   });
 }
 
-/**
- * CSRF check for anything that changes state. Browsers always send an Origin
- * header on a cross-site POST/PATCH/DELETE; if its host isn't the host this
- * request was sent to, another site is trying to act with the user's cookie.
- *
- * Compared against the Host header, NOT request.nextUrl: Next builds nextUrl
- * from its own configured hostname (localhost) and ignores Host, so on any
- * other name - dulsara.localhost, a LAN IP, a real domain - nextUrl never
- * matched and every write was refused. Both headers are set by the browser
- * itself; a page on another site can change neither.
- */
+// Compare Origin to the Host header, not nextUrl: nextUrl ignores Host (broke dulsara.localhost).
 export function isAllowedOrigin(request: NextRequest): boolean {
   if (SAFE_METHODS.has(request.method)) {
     return true;
@@ -47,17 +37,10 @@ export function isAllowedOrigin(request: NextRequest): boolean {
   return URL.canParse(origin) && new URL(origin).host === host;
 }
 
-/**
- * Response headers worth keeping on the way through. cache-control carries
- * the stream's no-transform (stops gzip buffering it); x-accel-buffering
- * stops an Nginx in front of Next from buffering it.
- */
+// cache-control (no-transform) and x-accel-buffering keep the stream unbuffered.
 const RELAYED_HEADERS = ["content-type", "cache-control", "x-accel-buffering"];
 
-/**
- * Spring's response, passed to the browser unchanged: status, a streamed body
- * (never buffered — a live SSE response flows straight through) and headers.
- */
+// Body is streamed, never buffered, so a live SSE response flows straight through.
 export function relayBackendResponse(backendResponse: Response): NextResponse {
   const headers = new Headers();
   for (const name of RELAYED_HEADERS) {
@@ -72,7 +55,6 @@ export function relayBackendResponse(backendResponse: Response): NextResponse {
   });
 }
 
-/** Errors raised by the Next layer itself, in the same envelope Spring uses. */
 export function errorResponse(status: number, key: MessageKey): NextResponse {
   const body: ApiErrorEnvelope = {
     status: "unsuccessful",

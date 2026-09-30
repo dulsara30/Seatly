@@ -8,7 +8,7 @@ interface SearchBarProps {
   placeholder: string;
 }
 
-/** Controlled and instant; debouncing is the caller's job, so the input never lags. */
+// Debouncing is the caller's job, so the input never lags.
 export function SearchBar({ value, onChange, label, placeholder }: SearchBarProps) {
   const id = useId();
   return (

@@ -1,9 +1,5 @@
 package com.seatly.backend.common.type;
 
-/**
- * The single source of every common message key string — same pattern as
- * EventMessageKeys, so annotations and the enum share one spelling.
- */
 public interface CommonMessageKeys {
 
     String AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED";

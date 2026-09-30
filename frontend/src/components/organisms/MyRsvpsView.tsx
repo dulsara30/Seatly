@@ -37,7 +37,6 @@ const EMPTY_COPY: Record<Tab, { title: string; body: string }> = {
   },
 };
 
-/** 05 My RSVPs - confirmed seats and places in line, soonest event first. */
 export function MyRsvpsView() {
   const [tab, setTab] = useState<Tab>(RsvpStatus.CONFIRMED);
   const session = useSession();
@@ -113,8 +112,7 @@ function RsvpList({ rsvps, tab }: { rsvps: MyRsvpResponse[]; tab: Tab }) {
           meta={`${formatLongDate(rsvp.eventDate)} · ${formatTime(rsvp.eventDate)}`}
           href={Routes.eventDetail(rsvp.eventId)}
           trailing={
-            // A cancelled or finished event: say so, and offer nothing to
-            // cancel - the backend refuses RSVP changes once it isn't UPCOMING.
+            // Not UPCOMING: offer nothing to cancel - the backend refuses RSVP changes then.
             rsvp.eventStatus !== EventStatus.UPCOMING ? (
               <Badge variant={rsvp.eventStatus} />
             ) : (

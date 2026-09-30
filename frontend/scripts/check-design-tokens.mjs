@@ -1,13 +1,4 @@
-// Fails the lint if any source file bypasses the design tokens.
-//
-// Tailwind 4 can't forbid arbitrary values on its own — `bg-[#123456]` and
-// `p-[13px]` always compile. The theme in globals.css already removes every
-// built-in value outside the design system; this closes the other door.
-//
-// Two checks, over src/ only:
-//   1. Tailwind arbitrary values:   something-[...]
-//   2. Raw hex colours:             #fff, #0D0D0D — outside globals.css, the
-//                                   one file where tokens are defined.
+// Fails lint on Tailwind arbitrary values (x-[...]) and raw hex colours outside globals.css.
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";

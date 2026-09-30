@@ -20,10 +20,7 @@ public record RegisterRequestDto(
         @Size(max = UserFieldLimits.EMAIL_MAX_LENGTH, message = AuthMessageKeys.EMAIL_TOO_LONG)
         String email,
 
-        // Opted out of the global trimmer: spaces are part of a password. If
-        // "  secret  " were silently stored as "secret", the password the
-        // user chose would not be the one that works. @NotEmpty, not
-        // @NotBlank, for the same reason.
+        // Opts out of trimming (and @NotEmpty, not @NotBlank): spaces are part of a password.
         @JsonDeserialize(using = StringDeserializer.class)
         @NotEmpty(message = AuthMessageKeys.PASSWORD_REQUIRED)
         @Size(min = UserFieldLimits.PASSWORD_MIN_LENGTH, message = AuthMessageKeys.PASSWORD_TOO_SHORT)

@@ -4,14 +4,7 @@ import { useMyRsvps } from "@/api/RsvpApi";
 import type { Id } from "@/types/entities/primitives";
 import type { MyRsvpResponse } from "@/types/responses/RsvpResponse";
 
-/**
- * The caller's active RSVPs, keyed by event - so any card or panel can ask
- * "am I going to this?" without a request per event.
- *
- * The event responses don't say whether YOU are going (the detail DTO has no
- * myRsvpStatus field), so this derives it from GET /v1/rsvps/my. Only fetched
- * when logged in: for an anonymous visitor the answer is simply "no".
- */
+// Event responses don't say whether you're going, so derive it from GET /v1/rsvps/my.
 export function useMyRsvpLookup() {
   const { data: session } = useSession();
   const signedIn = session?.user != null;

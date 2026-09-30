@@ -28,7 +28,6 @@ import type { RsvpResponse } from "@/types/responses/RsvpResponse";
 import { formatLongDate, formatTime } from "@/utils/dateTime";
 import { rsvpPanelStateOf } from "@/utils/rsvpPanelState";
 
-/** 02 / 03 / 04 Detail - one view; the RSVP panel carries the Available / Confirmed / Waitlisted states. */
 export function EventDetailView({ eventId }: { eventId: Id }) {
   const event = useEvent(eventId);
 
@@ -143,7 +142,6 @@ function EventSummary({ event }: { event: EventDetailResponse }) {
   );
 }
 
-/** Owns the RSVP mutations and turns their results into toasts; the panel just renders. */
 function RsvpSection({ event }: { event: EventDetailResponse }) {
   const session = useSession();
   const myRsvps = useMyRsvpLookup();
@@ -153,7 +151,7 @@ function RsvpSection({ event }: { event: EventDetailResponse }) {
   // Opened only once the event has loaded — never a stream for a 404.
   const seatStreamStatus = useEventSeatStream(event.id);
 
-  // Until we know who's looking, any state shown would be a guess that flips.
+  // Skeleton until we know who's looking - any state shown before would flip.
   if (session.isPending || myRsvps.isLoading) {
     return <Skeleton className="h-48 w-full" />;
   }

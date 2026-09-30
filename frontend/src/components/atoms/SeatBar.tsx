@@ -15,9 +15,7 @@ const LABEL_CLASSES: Record<SeatState, string> = {
   FULL: "text-black",
 };
 
-// Available and low fill yellow - one of the three places filled yellow is
-// allowed. Full turns the whole bar black: "no more seats" should read as
-// an end state, not as a very full version of the same thing.
+// Full turns the whole bar black so "no seats" reads as an end state, not a very full bar.
 const FILL_CLASSES: Record<SeatState, string> = {
   AVAILABLE: "bg-yellow-500",
   LOW: "bg-yellow-500",
@@ -39,10 +37,7 @@ function labelFor(
   }
 }
 
-/**
- * The signature element: how full an event is, readable in one glance. The
- * bar shows seats TAKEN, so it fills up as the event does.
- */
+// The bar shows seats TAKEN, so it fills up as the event does.
 export function SeatBar({ availableSeats, seatLimit }: SeatBarProps) {
   const state = seatStateOf(availableSeats, seatLimit);
   const taken = takenSeats(availableSeats, seatLimit);

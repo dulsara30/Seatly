@@ -4,16 +4,11 @@ interface ModalProps {
   open: boolean;
   title: string;
   onClose: () => void;
-  /** The action buttons, primary last. */
   actions: ReactNode;
   children: ReactNode;
 }
 
-/**
- * The native <dialog> in modal mode: the browser supplies the focus trap,
- * Escape to close and an inert page behind it - no library, nothing
- * hand-rolled to get subtly wrong.
- */
+// Native <dialog>: the browser supplies the focus trap, Escape and an inert page behind.
 export function Modal({ open, title, onClose, actions, children }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();

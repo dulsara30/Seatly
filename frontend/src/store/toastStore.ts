@@ -21,10 +21,7 @@ interface ToastState {
 
 let nextToastId = 0;
 
-/**
- * Client state in the strict sense - the server never sees a toast - so it
- * belongs in Zustand. Components call show(); ToastViewport renders the list.
- */
+// Client state (the server never sees a toast), so Zustand rather than a query.
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   show: (tone, message) => {

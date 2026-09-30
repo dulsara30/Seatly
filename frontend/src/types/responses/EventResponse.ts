@@ -3,10 +3,7 @@ import type { Id, LocalDateTimeString } from "@/types/entities/primitives";
 import type { Tag } from "@/types/entities/Tag";
 import type { UserSummary } from "@/types/entities/User";
 
-/**
- * event/payload/EventResponseDto.java - the list card. availableSeats is
- * derived by the backend (seatLimit − confirmed); never compute it here.
- */
+// event/payload/EventResponseDto.java; availableSeats is derived by the backend, never here.
 export interface EventResponse {
   id: Id;
   name: string;
@@ -20,11 +17,7 @@ export interface EventResponse {
   organizer: UserSummary;
 }
 
-/**
- * event/payload/EventDetailResponseDto.java - adds description and
- * meetingLink. meetingLink is null for PHYSICAL events AND for callers who
- * aren't the organiser or a confirmed attendee; `mode` tells the two apart.
- */
+// event/payload/EventDetailResponseDto.java; meetingLink is null for PHYSICAL or non-attendees.
 export interface EventDetailResponse extends EventResponse {
   description: string;
   meetingLink: string | null;

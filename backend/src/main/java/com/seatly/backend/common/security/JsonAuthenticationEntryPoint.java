@@ -11,12 +11,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * The 401 for "this endpoint needs a login". Security rejects the request in
- * the filter chain, before it reaches any controller — so
- * GlobalExceptionHandler never sees it, and without this the client would get
- * Spring's default empty 401 instead of the standard error envelope.
- */
+// Security rejects before GlobalExceptionHandler runs, so the 401 error envelope is built here.
 @Component
 public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

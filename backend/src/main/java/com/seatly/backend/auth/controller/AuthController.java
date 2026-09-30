@@ -28,8 +28,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // Empty @SecurityRequirements removes Swagger's padlock: these are the
-    // endpoints you call to GET a token, so they can't require one.
+    // Empty @SecurityRequirements: these endpoints issue the token, so they can't require one.
     @PostMapping(ApiPaths.AUTH_REGISTER)
     @SecurityRequirements
     @Operation(summary = "Register an account")

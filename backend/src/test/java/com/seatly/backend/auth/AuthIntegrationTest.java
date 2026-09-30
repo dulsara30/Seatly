@@ -30,8 +30,6 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
     private static final String PASSWORD = "correct horse battery";
     private static final String OUR_ISSUER = "seatly";
 
-    // ---- register ----
-
     @Test
     void registersUserWithoutEverReturningThePassword() {
         MvcTestResult result = postAnonymously(REGISTER_PATH, registration("new@seatly.test"));
@@ -61,7 +59,6 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.CONFLICT, AuthMessageKeys.EMAIL_ALREADY_REGISTERED);
     }
 
-    // Case doesn't make it a different inbox, so it can't be a second account.
     @Test
     void rejectsEmailAlreadyRegisteredInDifferentCase() {
         assertError(postAnonymously(REGISTER_PATH, registration("ATTENDEE@SEATLY.DEV")),
@@ -81,8 +78,7 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         assertError(postAnonymously(REGISTER_PATH, request), HttpStatus.BAD_REQUEST, AuthMessageKeys.PASSWORD_TOO_SHORT);
     }
 
-    // 30 characters, but 90 bytes in UTF-8 — over BCrypt's 72-byte limit even
-    // though a character count would call it fine.
+    // 30 characters but 90 UTF-8 bytes: over BCrypt's 72-byte limit.
     @Test
     void rejectsPasswordOverBcryptByteLimit() {
         String multiBytePassword = "日".repeat(30);
@@ -91,8 +87,7 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         assertError(postAnonymously(REGISTER_PATH, request), HttpStatus.BAD_REQUEST, AuthMessageKeys.PASSWORD_TOO_LONG);
     }
 
-    // The global trimmer must not touch passwords: surrounding spaces are part
-    // of what the user typed, so only the exact string logs in.
+    // The global trimmer must skip passwords: surrounding spaces are part of what was typed.
     @Test
     void keepsSurroundingSpacesInPassword() {
         String spacedPassword = "  " + PASSWORD + "  ";
@@ -103,8 +98,6 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         assertError(postAnonymously(LOGIN_PATH, new LoginRequestDto("spaces@seatly.test", PASSWORD)),
                 HttpStatus.UNAUTHORIZED, AuthMessageKeys.INVALID_CREDENTIALS);
     }
-
-    // ---- login ----
 
     @Test
     void logsInSeededAccountAndReturnsUsableToken() {
@@ -130,7 +123,7 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.UNAUTHORIZED, AuthMessageKeys.INVALID_CREDENTIALS);
     }
 
-    // Same key as a wrong password: login must not reveal which emails exist.
+    // Same key as a wrong password so login doesn't reveal which emails exist.
     @Test
     void rejectsUnknownEmailWithTheSameError() {
         assertError(postAnonymously(LOGIN_PATH, new LoginRequestDto("nobody@seatly.test", TestData.SEEDED_PASSWORD)),
@@ -155,8 +148,6 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.UNAUTHORIZED, AuthMessageKeys.INVALID_CREDENTIALS);
     }
 
-    // ---- me, and every way a token can be wrong ----
-
     @Test
     void returnsTheCallersOwnAccount() {
         MvcTestResult result = mvc.get().uri(ME_PATH)
@@ -176,8 +167,6 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         assertError(meWithToken("not-a-jwt"), HttpStatus.UNAUTHORIZED, CommonMessageKeys.AUTHENTICATION_REQUIRED);
     }
 
-    // Expiry is checked against the injected Clock — frozen here, so "an hour
-    // ago" is exact and the test can't flake around a boundary.
     @Test
     void rejectsExpiredToken() {
         String expired = token(testSigningKey(), OUR_ISSUER, FIXED_INSTANT.minus(Duration.ofSeconds(1)));
@@ -185,7 +174,6 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         assertError(meWithToken(expired), HttpStatus.UNAUTHORIZED, CommonMessageKeys.AUTHENTICATION_REQUIRED);
     }
 
-    // Well-formed and unexpired, but signed with someone else's key: a forgery.
     @Test
     void rejectsTokenSignedWithAnotherKey() {
         String forged = token(Jwts.SIG.HS256.key().build(), OUR_ISSUER, FIXED_INSTANT.plus(Duration.ofHours(1)));
@@ -200,7 +188,6 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         assertError(meWithToken(foreign), HttpStatus.UNAUTHORIZED, CommonMessageKeys.AUTHENTICATION_REQUIRED);
     }
 
-    // The token outlives nothing about the account.
     @Test
     void rejectsValidTokenOfDeletedAccount() {
         long attendeeId = testData.userIdByEmail(TestData.SEEDED_ATTENDEE_EMAIL);

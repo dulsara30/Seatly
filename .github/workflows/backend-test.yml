@@ -1,6 +1,4 @@
-# Continuous testing: the integration suite runs against a real Postgres
-# started by Testcontainers. GitHub's ubuntu runners ship with Docker, so no
-# database service or credentials need configuring here.
+# No DB service needed: Testcontainers works because ubuntu runners have Docker.
 name: Backend tests
 
 on:
@@ -42,8 +40,7 @@ jobs:
       - name: Test
         run: ./mvnw -B -ntp clean verify
 
-      # On failure, keep the per-test reports so the cause can be read
-      # without re-running the job.
+      # Upload reports on failure so the cause is readable without a rerun.
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4

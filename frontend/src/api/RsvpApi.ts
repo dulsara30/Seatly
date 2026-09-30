@@ -33,7 +33,7 @@ const fetchAttendees = async (eventId: Id): Promise<AttendeeListResponse> =>
     ),
   );
 
-// These two return the list AS the envelope's results - see envelope.ts.
+// These return the list AS the envelope's results, hence unwrapMany.
 const fetchWaitlist = async (eventId: Id): Promise<WaitlistEntryResponse[]> =>
   unwrapMany(
     await axiosInstance.get<ApiEnvelope<WaitlistEntryResponse>>(
@@ -46,11 +46,7 @@ const fetchMyRsvps = async (): Promise<MyRsvpResponse[]> =>
     await axiosInstance.get<ApiEnvelope<MyRsvpResponse>>(ApiEndpoints.rsvps.my),
   );
 
-/**
- * An RSVP or a cancellation moves seat counts on every list and detail view,
- * can promote someone off the waitlist, and changes "my RSVPs" - so both
- * mutations refresh the whole events tree and the caller's own list.
- */
+// An RSVP moves seat counts everywhere and can promote from the waitlist: refresh all.
 const useRsvpMutation = (
   mutationFn: (eventId: Id) => Promise<RsvpResponse>,
 ) => {
@@ -68,21 +64,19 @@ export const useCreateRsvp = () => useRsvpMutation(createRsvp);
 
 export const useCancelRsvp = () => useRsvpMutation(cancelRsvp);
 
-/** Organiser only - anyone else gets a 403. */
 export const useAttendees = (eventId: Id) =>
   useQuery({
     queryKey: QueryKeys.events.attendees(eventId),
     queryFn: () => fetchAttendees(eventId),
   });
 
-/** Organiser only - anyone else gets a 403. */
 export const useWaitlist = (eventId: Id) =>
   useQuery({
     queryKey: QueryKeys.events.waitlist(eventId),
     queryFn: () => fetchWaitlist(eventId),
   });
 
-/** Requires a session - pass enabled: false for anonymous visitors rather than letting it 401. */
+// Pass enabled: false for anonymous visitors rather than letting it 401.
 export const useMyRsvps = ({ enabled }: { enabled: boolean }) =>
   useQuery({
     queryKey: QueryKeys.rsvps.my,

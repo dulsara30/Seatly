@@ -30,7 +30,6 @@ import { takenSeats } from "@/utils/seats";
 const AttendanceTab = { CONFIRMED: "CONFIRMED", WAITLIST: "WAITLIST" } as const;
 type AttendanceTab = (typeof AttendanceTab)[keyof typeof AttendanceTab];
 
-/** 08 Manage Event - seat limit, who's in, who's waiting, and the danger zone. */
 export function ManageEventView({ eventId }: { eventId: Id }) {
   const event = useEvent(eventId);
 
@@ -58,8 +57,7 @@ export function ManageEventView({ eventId }: { eventId: Id }) {
       </Link>
       <EventHeader event={event.data} />
       {isUpcoming ? (
-        // Keyed on the saved limit, so the stepper resets to the server's
-        // value whenever that changes - not only on first render.
+        // Keyed on the saved limit, so the stepper resets whenever the server's value changes.
         <SeatLimitEditor key={event.data.seatLimit} event={event.data} />
       ) : (
         <p className="rounded-md bg-gray-100 px-4 py-3 text-body-s text-gray-500">
@@ -88,11 +86,7 @@ function EventHeader({ event }: { event: EventDetailResponse }) {
   );
 }
 
-/**
- * Lowering the limit below the people already confirmed would un-confirm
- * someone, which the backend refuses - so the stepper can't go there either.
- * Raising it promotes from the waitlist, server-side, in the same transaction.
- */
+// Can't go below confirmed seats: that would un-confirm someone, which the backend refuses.
 function SeatLimitEditor({ event }: { event: EventDetailResponse }) {
   const [seatLimit, setSeatLimit] = useState(event.seatLimit);
   const updateEvent = useUpdateEvent();
@@ -138,7 +132,6 @@ function SeatLimitEditor({ event }: { event: EventDetailResponse }) {
   );
 }
 
-/** The confirmed list and the queue. The waitlist tab is the one organisers live in. */
 function Attendance({ eventId }: { eventId: Id }) {
   const [tab, setTab] = useState<AttendanceTab>(AttendanceTab.CONFIRMED);
   const attendees = useAttendees(eventId);

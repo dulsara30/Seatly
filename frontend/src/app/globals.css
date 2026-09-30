@@ -1,18 +1,7 @@
 @import "tailwindcss";
 
-/*
- * Seatly design tokens - the only values the UI may use.
- *
- * Every `--x-*: initial;` line deletes Tailwind's built-in values for that
- * group, so a class outside the design system (bg-blue-500, rounded-2xl,
- * shadow-md) simply doesn't exist. Arbitrary values - a utility followed by a
- * square-bracketed raw value - would still compile, so `npm run lint` rejects
- * them separately: see scripts/check-design-tokens.mjs.
- *
- * YELLOW IS AN ACCENT, NEVER A BACKGROUND. A filled yellow surface appears in
- * exactly three places: the active filter chip, the seat bar fill, and the
- * single primary CTA on a screen. Anything else that needs emphasis is black.
- */
+/* Each `--x-*: initial;` deletes Tailwind's built-ins; arbitrary values are caught by lint. */
+/* Filled yellow only in three places: active filter chip, seat bar fill, the one primary CTA. */
 @theme {
   --color-*: initial;
 
@@ -45,8 +34,7 @@
   --radius-xl: 20px;
   --radius-full: 999px;
 
-  /* The Figma file names shadow sm/md/lg but gives no values yet. Rather than
-     invent them, there are none until the design specifies them. */
+  /* No shadows until the Figma file gives values for sm/md/lg. */
   --shadow-*: initial;
 
   --font-*: initial;
@@ -58,9 +46,7 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  /* Type scale from the Figma "Typography" frame: size and weight as
-     designed. Line heights and letter spacing aren't specified there, so
-     these are chosen defaults - tight for large headings, open for body. */
+  /* Line heights and letter spacing aren't in the Figma frame; these are chosen defaults. */
   --text-*: initial;
   --text-display: 48px;
   --text-display--line-height: 1.1;

@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 interface PageHeadingProps {
   title: string;
   subtitle?: string;
-  /** A primary action beside the title, e.g. "Create event". */
   action?: ReactNode;
 }
 

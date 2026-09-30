@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/organisms/SiteHeader";
 import { ToastViewport } from "@/components/organisms/ToastViewport";
 
-/** Header, page, toasts - the frame every route renders inside. */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <>

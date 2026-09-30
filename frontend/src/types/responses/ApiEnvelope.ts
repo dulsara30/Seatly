@@ -1,12 +1,4 @@
-/**
- * common/payload/ResponseEntityDto.java - every backend response, success or
- * failure, arrives in this envelope.
- *
- * `results` is always an array. Most endpoints put one object in it; list
- * endpoints that aren't paged (waitlist, my RSVPs) put the list itself in it.
- * The API layer unwraps the envelope (api/utils/envelope.ts), so hooks and
- * components only ever see the payload type - never this.
- */
+// common/payload/ResponseEntityDto.java; results is always an array, even for one object.
 
 // common/type/ResponseStatusType.java, serialised by its @JsonValue
 export type ApiStatus = "successful" | "unsuccessful";

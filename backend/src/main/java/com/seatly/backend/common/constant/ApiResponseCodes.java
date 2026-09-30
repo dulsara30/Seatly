@@ -1,9 +1,6 @@
 package com.seatly.backend.common.constant;
 
-/**
- * Status codes as Strings for OpenAPI's @ApiResponse(responseCode = ...),
- * which only accepts a String. Runtime code uses HttpStatus instead.
- */
+// Strings because @ApiResponse(responseCode = ...) only accepts a String.
 public final class ApiResponseCodes {
 
     public static final String OK = "200";

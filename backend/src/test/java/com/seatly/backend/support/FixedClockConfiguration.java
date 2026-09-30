@@ -9,11 +9,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-/**
- * Freezes "now" for every test. Without this, a test asserting that
- * 2026-10-15 is "in the future" silently starts failing on 2026-10-16 —
- * this is what the Clock bean in ClockConfig exists for.
- */
+// Frozen "now" so date rules in tests don't rot as the real date moves on.
 @TestConfiguration(proxyBeanMethods = false)
 public class FixedClockConfiguration {
 
@@ -21,7 +17,7 @@ public class FixedClockConfiguration {
     public static final Instant FIXED_INSTANT = Instant.parse("2026-09-29T09:00:00Z");
     public static final LocalDateTime NOW = LocalDateTime.ofInstant(FIXED_INSTANT, ZONE);
 
-    // @Primary wins over ClockConfig's bean without renaming or disabling it.
+    // @Primary overrides ClockConfig's Clock without renaming or disabling it.
     @Bean
     @Primary
     Clock fixedClock() {

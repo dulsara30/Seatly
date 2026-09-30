@@ -12,10 +12,7 @@ public class SeatStreamService {
     private final EventService eventService;
     private final SeatStreamRegistry registry;
 
-    /**
-     * The counts are read first, so an unknown or deleted event is a normal
-     * 404 before any stream exists — never an open stream for nothing.
-     */
+    // Counts are read first, so an unknown event is a 404 before any stream opens.
     public SseEmitter openSeatStream(Long eventId) {
         return registry.open(eventService.getSeatCount(eventId));
     }

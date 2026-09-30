@@ -1,21 +1,13 @@
 import "server-only";
 import type { NextResponse } from "next/server";
 
-/** The session cookie. httpOnly: no script in the page can read it, so XSS can't steal it. */
+// httpOnly: no page script can read it, so XSS can't steal the token.
 export const AUTH_COOKIE_NAME = "seatly_session";
 
 const SECONDS_TO_MS = 1000;
 const JWT_PAYLOAD_SEGMENT = 1;
 
-/**
- * The cookie expires when the token does, read from the token's own `exp`
- * claim - so the backend's TTL (seatly.jwt.access-token-ttl) stays the
- * single source of truth instead of being copied here.
- *
- * SameSite=Lax is the CSRF defence: the browser won't attach this cookie to
- * a POST/PATCH/DELETE started by another site. The proxy route adds an
- * Origin check on top. Secure only in production, because local dev is http.
- */
+// Expires at the token's exp; SameSite=Lax is the CSRF defence; Secure only in prod (dev is http).
 export function setAuthCookie(
   response: NextResponse,
   accessToken: string,
@@ -35,8 +27,7 @@ export function clearAuthCookie(response: NextResponse): void {
   response.cookies.delete(AUTH_COOKIE_NAME);
 }
 
-// Decoding, not verifying: this only reads when the cookie should expire.
-// Spring verifies the signature on every request - that is the real check.
+// Decoding, not verifying: Spring checks the signature on every request.
 function tokenExpiry(accessToken: string): Date {
   const payload = accessToken.split(".")[JWT_PAYLOAD_SEGMENT];
   if (payload === undefined) {

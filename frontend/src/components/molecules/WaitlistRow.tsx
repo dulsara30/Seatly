@@ -8,12 +8,7 @@ type WaitlistRowProps = Pick<
   "position" | "name" | "email" | "rsvpAt"
 >;
 
-/**
- * A place in a queue, so the POSITION is the loudest thing on the row: a
- * large yellow numbered circle, ahead of the name. This is the one deliberate
- * exception to "filled yellow only in three places" - the design calls for it,
- * and here the number, not the person, is what the organiser scans for.
- */
+// Deliberate exception to the three-yellow-fills rule: organisers scan for the position.
 export function WaitlistRow({
   position,
   name,

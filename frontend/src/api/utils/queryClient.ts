@@ -6,9 +6,7 @@ import {
   QUERY_STALE_TIME_MS,
 } from "@/constants/timing";
 
-// A 4xx means the request itself is wrong (not found, not allowed, invalid) -
-// asking again gets the same answer, just later. Only a server-side failure
-// or a dropped connection is worth another try.
+// Retry only 5xx/network failures: a 4xx would just get the same answer again.
 function isWorthRetrying(error: Error): boolean {
   return !(
     error instanceof ApiError &&
@@ -36,12 +34,7 @@ function makeQueryClient(): QueryClient {
 
 let browserQueryClient: QueryClient | undefined;
 
-/**
- * TanStack's recommended App Router setup: one client per request on the
- * server, so one user's data can never leak into another's render; one
- * client for the lifetime of the tab in the browser. The axios 401 handler
- * uses the same browser client to clear the cache on session expiry.
- */
+// One client per request on the server (no cross-user leaks); one per tab in the browser.
 export function getQueryClient(): QueryClient {
   if (isServer) {
     return makeQueryClient();

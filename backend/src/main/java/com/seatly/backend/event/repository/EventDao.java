@@ -11,21 +11,13 @@ import org.springframework.data.jpa.repository.Lock;
 
 public interface EventDao extends JpaRepository<Event, Long>, EventRepository {
 
-    // A single event, so fetching the tag collection eagerly is safe here —
-    // the paging problem only exists for lists.
+    // A single event, so fetch-joining the tag collection is safe (the paging problem is lists only).
     @EntityGraph(attributePaths = {Event_.ORGANIZER, Event_.TAGS})
     Optional<Event> findByIdAndIsDeletedFalse(Long id);
 
-    /**
-     * SELECT ... FOR UPDATE. Used by updates that compare seatLimit against
-     * the confirmed count: without the lock, an RSVP could be confirmed
-     * between the count and the save, and the new limit would be below it.
-     * RSVP creation locks the same row, so the two serialise.
-     */
+    // FOR UPDATE prevents overselling: the seat-limit check is check-then-act.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Event> findLockedByIdAndIsDeletedFalse(Long id);
 
-    // Every status: the organiser's dashboard shows cancelled and completed
-    // events too. Tags batch-load via @BatchSize on Event.tags.
     List<Event> findByOrganizerIdAndIsDeletedFalseOrderByEventDateAsc(Long organizerId);
 }

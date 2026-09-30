@@ -7,10 +7,6 @@ export const SeatState = {
 } as const;
 export type SeatState = (typeof SeatState)[keyof typeof SeatState];
 
-/**
- * How full an event reads at a glance. The counts come from the backend
- * (availableSeats is derived there); this only decides how to show them.
- */
 export function seatStateOf(availableSeats: number, seatLimit: number): SeatState {
   if (availableSeats <= 0) {
     return SeatState.FULL;

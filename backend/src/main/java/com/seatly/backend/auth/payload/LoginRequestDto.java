@@ -6,17 +6,13 @@ import jakarta.validation.constraints.NotEmpty;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.deser.jdk.StringDeserializer;
 
-/**
- * No format or length rules beyond "present": a login attempt must never
- * reveal which rules a real password follows. Anything wrong is simply
- * INVALID_CREDENTIALS.
- */
+// No format rules: a login attempt must not reveal which rules a real password follows.
 public record LoginRequestDto(
 
         @NotBlank(message = AuthMessageKeys.EMAIL_REQUIRED)
         String email,
 
-        // Untrimmed, matching registration — see RegisterRequestDto.
+        // Untrimmed, matching RegisterRequestDto.
         @JsonDeserialize(using = StringDeserializer.class)
         @NotEmpty(message = AuthMessageKeys.PASSWORD_REQUIRED)
         String password) {

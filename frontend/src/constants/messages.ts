@@ -1,12 +1,4 @@
-/**
- * Backend message key -> the copy a user sees. The backend never sends prose,
- * only these keys; this is the only place wording lives.
- *
- * Every key the backend can return is listed, taken from the enums:
- * common/type/CommonMessageKeys, event/type/EventMessageKeys,
- * rsvp/type/RsvpMessageKeys, auth/type/AuthMessageKeys. A new backend key
- * needs a line here - until then it shows UNKNOWN_ERROR.
- */
+// A backend key missing here shows as UNKNOWN_ERROR.
 export const MESSAGES = {
   // common/type/CommonMessageKeys.java
   AUTHENTICATION_REQUIRED: "Please sign in to continue.",

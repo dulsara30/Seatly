@@ -20,7 +20,6 @@ import { takenSeats } from "@/utils/seats";
 
 const STAT_SKELETON_COUNT = 4;
 
-/** 06 Dashboard - four stats and the organiser's events. */
 export function OrganiserDashboard() {
   const myEvents = useMyEvents();
 

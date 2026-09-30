@@ -8,11 +8,9 @@ interface EventListRowProps {
   title: string;
   meta: string;
   href: string;
-  /** Badges, counts and actions on the right. */
   trailing: ReactNode;
 }
 
-/** An event as a row - the dashboard table and the My RSVPs list share it. */
 export function EventListRow({
   date,
   title,

@@ -51,8 +51,6 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.NOT_FOUND, EventMessageKeys.NOT_FOUND);
     }
 
-    // Organiser check
-
     @Test
     void forbidsUpdateByNonOrganiser() {
         long eventId = testData.insertEvent(testData.insertUser(), "Their Event", EventMode.PHYSICAL,
@@ -62,7 +60,7 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.FORBIDDEN, EventMessageKeys.NOT_ORGANIZER);
     }
 
-    // Who before state: a stranger must not learn that the event is cancelled.
+    // Who before state: a stranger must not learn the event is cancelled.
     @Test
     void checksOrganiserBeforeEventStatus() {
         long eventId = testData.insertEvent(testData.insertUser(), "Their Event", EventMode.PHYSICAL,
@@ -71,8 +69,6 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
         assertError(patch(eventId, changes().name("Renamed").build()),
                 HttpStatus.FORBIDDEN, EventMessageKeys.NOT_ORGANIZER);
     }
-
-    // Status check
 
     @Test
     void rejectsUpdateToCancelledEvent() {
@@ -83,8 +79,6 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.BAD_REQUEST, EventMessageKeys.NOT_UPCOMING);
     }
 
-    // Seat limit against confirmed count
-
     @Test
     void rejectsSeatLimitBelowConfirmedCount() {
         long eventId = ownEventWithConfirmedRsvps();
@@ -93,7 +87,6 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.BAD_REQUEST, EventMessageKeys.SEAT_LIMIT_BELOW_CONFIRMED);
     }
 
-    // The boundary: every confirmed person keeps their seat, zero seats left.
     @Test
     void acceptsSeatLimitEqualToConfirmedCount() {
         long eventId = ownEventWithConfirmedRsvps();
@@ -103,8 +96,6 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
         assertThat(result).hasStatusOk();
         assertThat(result).bodyJson().extractingPath("$.results[0].availableSeats").isEqualTo(0);
     }
-
-    // Event date
 
     @Test
     void rejectsEventDateInThePast() {
@@ -120,8 +111,6 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(patch(eventId, changes().eventDate(NOW.plusMonths(1)).build())).hasStatusOk();
     }
-
-    // Mode switch — the unused venue field is cleared in BOTH directions.
 
     @Test
     void clearsLocationWhenSwitchingPhysicalToOnline() {
@@ -161,9 +150,7 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
                 HttpStatus.BAD_REQUEST, EventMessageKeys.LOCATION_REQUIRED);
     }
 
-    // The service modifies the entity before this check fails — the
-    // transaction rollback must discard that. Readable here only because the
-    // tests don't share a transaction with the request.
+    // The service mutates the entity before failing; the rollback must discard that.
     @Test
     void leavesEventUnchangedWhenUpdateIsRejected() {
         long eventId = ownEvent(EventMode.PHYSICAL);
@@ -176,8 +163,6 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
         assertThat(after).bodyJson().extractingPath("$.results[0].mode").isEqualTo(EventMode.PHYSICAL.name());
         assertThat(after).bodyJson().extractingPath("$.results[0].location").isEqualTo(TestData.PHYSICAL_LOCATION);
     }
-
-    // Tags: omitted = unchanged, empty = remove all, unknown id = rejected.
 
     @Test
     void keepsTagsWhenTagIdsOmitted() {
@@ -220,7 +205,7 @@ class UpdateEventIntegrationTest extends AbstractIntegrationTest {
         return new UpdateRequestBuilder();
     }
 
-    /** A PATCH body with only the named fields set; every other field is null ("unchanged"). */
+    // Unset fields stay null, which PATCH treats as "unchanged".
     private static final class UpdateRequestBuilder {
 
         private String name;

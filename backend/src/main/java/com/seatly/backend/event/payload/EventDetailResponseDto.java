@@ -7,10 +7,6 @@ import com.seatly.backend.user.payload.UserSummaryDto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Detail-page shape: the list fields plus description and meetingLink. Kept
- * flat rather than nesting EventResponseDto so the JSON matches the API design.
- */
 public record EventDetailResponseDto(
         Long id,
         String name,

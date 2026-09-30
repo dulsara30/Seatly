@@ -1,12 +1,12 @@
 import type { Id } from "@/types/entities/primitives";
 
-/** user/payload/UserSummaryDto.java - another person, as the public sees them. No email. */
+// user/payload/UserSummaryDto.java - the public view, so no email.
 export interface UserSummary {
   id: Id;
   name: string;
 }
 
-/** user/payload/UserResponseDto.java - your own account. */
+// user/payload/UserResponseDto.java
 export interface User {
   id: Id;
   name: string;

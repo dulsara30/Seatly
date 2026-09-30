@@ -16,10 +16,7 @@ const LABELS: Record<SeatStreamStatus, string> = {
   UNAVAILABLE: Copy.live.unavailable,
 };
 
-/**
- * Says whether the seat count is live. While reconnecting it says so in
- * words, so a dropped connection reads as "a moment behind", not broken.
- */
+// Says "reconnecting" in words, so a dropped connection reads as "a moment behind", not broken.
 export function LiveIndicator({ status }: { status: SeatStreamStatus }) {
   return (
     <span role="status" className="inline-flex items-center gap-1.5 text-caption text-gray-500">

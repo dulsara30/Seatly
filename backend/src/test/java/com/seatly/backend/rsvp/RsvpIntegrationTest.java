@@ -22,8 +22,6 @@ class RsvpIntegrationTest extends AbstractIntegrationTest {
     private static final String WAITLIST_PATH = "/v1/events/{eventId}/waitlist";
     private static final String MY_RSVPS_PATH = "/v1/rsvps/my";
 
-    // ---- create ----
-
     @Test
     void confirmsWhenASeatIsFree() {
         long eventId = eventWithSeatLimit(10);
@@ -37,7 +35,6 @@ class RsvpIntegrationTest extends AbstractIntegrationTest {
         assertThat(testData.rsvpStatusOf(eventId, userId)).isEqualTo(RsvpStatus.CONFIRMED.name());
     }
 
-    // Full is not an error: it's a place in the queue, numbered in arrival order.
     @Test
     void waitlistsWhenFullWithTheNextPosition() {
         long eventId = eventWithSeatLimit(1);
@@ -85,8 +82,7 @@ class RsvpIntegrationTest extends AbstractIntegrationTest {
         assertError(rsvpAs(eventId, userId), HttpStatus.CONFLICT, RsvpMessageKeys.ALREADY_EXISTS);
     }
 
-    // The unique constraint on (user_id, event_id) would reject a second row;
-    // re-RSVPing reuses the cancelled one instead.
+    // (user_id, event_id) is unique, so re-RSVPing must reuse the cancelled row.
     @Test
     void allowsRsvpAgainAfterCancelling() {
         long eventId = eventWithSeatLimit(10);
@@ -110,8 +106,6 @@ class RsvpIntegrationTest extends AbstractIntegrationTest {
         assertError(mvc.post().uri(RSVP_PATH, eventWithSeatLimit(10)).exchange(),
                 HttpStatus.UNAUTHORIZED, CommonMessageKeys.AUTHENTICATION_REQUIRED);
     }
-
-    // ---- cancel ----
 
     @Test
     void cancelReturnsTheCancelledRsvp() {
@@ -140,8 +134,6 @@ class RsvpIntegrationTest extends AbstractIntegrationTest {
 
         assertError(cancelRsvpAs(eventId, userId), HttpStatus.NOT_FOUND, RsvpMessageKeys.NOT_FOUND);
     }
-
-    // ---- organiser views ----
 
     @Test
     void showsConfirmedAttendeesToOrganiser() {
@@ -186,8 +178,6 @@ class RsvpIntegrationTest extends AbstractIntegrationTest {
         assertError(mvc.get().uri(ATTENDEES_PATH, eventWithSeatLimit(10)).exchange(),
                 HttpStatus.UNAUTHORIZED, CommonMessageKeys.AUTHENTICATION_REQUIRED);
     }
-
-    // ---- my RSVPs ----
 
     @Test
     void listsMyActiveRsvpsSoonestFirstWithoutCancelledOnes() {

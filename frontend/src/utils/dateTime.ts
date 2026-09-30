@@ -2,12 +2,7 @@ import { DAY_MS } from "@/constants/timing";
 import { DISPLAY_LOCALE } from "@/constants/ui";
 import type { LocalDateTimeString } from "@/types/entities/primitives";
 
-/**
- * The backend sends LocalDateTime - the organiser's wall-clock time with no
- * offset ("2026-10-15T18:30:00"). ECMAScript parses a date-time string with
- * no offset as LOCAL time, which is exactly the intent; it is never shifted
- * as if it were UTC.
- */
+// No offset, so JS parses it as local time - which is intended; never treat it as UTC.
 export function parseLocalDateTime(value: LocalDateTimeString): Date {
   return new Date(value);
 }
@@ -31,23 +26,18 @@ const relativeFormat = new Intl.RelativeTimeFormat(DISPLAY_LOCALE, {
   numeric: "auto",
 });
 
-/** "THU" - for the date chip. */
 export const formatWeekday = (value: LocalDateTimeString) =>
   weekdayFormat.format(parseLocalDateTime(value)).toUpperCase();
 
-/** "15" - for the date chip. */
 export const formatDayOfMonth = (value: LocalDateTimeString) =>
   dayFormat.format(parseLocalDateTime(value));
 
-/** "6:30 pm" */
 export const formatTime = (value: LocalDateTimeString) =>
   timeFormat.format(parseLocalDateTime(value));
 
-/** "Thursday 15 October 2026" */
 export const formatLongDate = (value: LocalDateTimeString) =>
   longDateFormat.format(parseLocalDateTime(value));
 
-/** "2 days ago", "yesterday", "today" - whole days only; RSVP times don't need more. */
 export function formatDaysAgo(
   value: LocalDateTimeString,
   now: Date = new Date(),
@@ -58,21 +48,16 @@ export function formatDaysAgo(
   return relativeFormat.format(days, "day");
 }
 
-/** Whether a string from a datetime-local input is a real date (it's "" while cleared). */
 export const isValidLocalDateTime = (value: string) =>
   !Number.isNaN(parseLocalDateTime(value).getTime());
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
-/**
- * A Date as the "YYYY-MM-DDTHH:mm" a datetime-local input expects, in local
- * time. (toISOString would convert to UTC and shift the hour.)
- */
+// Not toISOString: that converts to UTC and shifts the hour.
 export function toLocalDateTimeInput(date: Date): LocalDateTimeString {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-/** True if the event starts between now and `days` from now. */
 export function isWithinDays(
   value: LocalDateTimeString,
   days: number,

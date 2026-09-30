@@ -4,12 +4,10 @@ import type { ReactNode } from "react";
 interface AuthLayoutProps {
   title: string;
   subtitle: string;
-  /** The "no account? / have an account?" line under the card. */
   footer: ReactNode;
   children: ReactNode;
 }
 
-/** A single centred card - no distractions on the way in. */
 export function AuthLayout({
   title,
   subtitle,

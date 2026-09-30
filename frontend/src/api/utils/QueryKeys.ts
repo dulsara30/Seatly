@@ -1,12 +1,7 @@
 import type { Id } from "@/types/entities/primitives";
 import type { EventListParams } from "@/types/requests/EventRequests";
 
-/**
- * Every TanStack Query cache key. Keys are hierarchical on purpose:
- * invalidating QueryKeys.events.all refreshes every list, every detail and
- * every attendee/waitlist view under it - which is exactly what an RSVP
- * change needs, since it moves seat counts everywhere.
- */
+// Hierarchical so invalidating a prefix (events.all) refreshes everything under it.
 export const QueryKeys = {
   auth: {
     session: ["auth", "session"] as const,

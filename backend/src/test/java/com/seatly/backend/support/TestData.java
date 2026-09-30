@@ -11,19 +11,12 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/**
- * Arranges database state the API can't create yet — other users, RSVPs,
- * cancelled or deleted events. Plain SQL, so a test's setup never depends on
- * the code it is testing.
- */
 public class TestData {
 
-    /** The organiser seeded by V2__seed_data.sql — the default caller in tests. */
     public static final long SEEDED_ORGANISER_ID = 1L;
     public static final String SEEDED_ORGANISER_EMAIL = "organiser@seatly.dev";
-    /** The attendee seeded by V3__seed_second_user.sql. */
     public static final String SEEDED_ATTENDEE_EMAIL = "attendee@seatly.dev";
-    /** Password of both seeded accounts — dev data, documented in V2 and V3. */
+    // Dev-only seed password from V2/V3, not a secret.
     public static final String SEEDED_PASSWORD = "seatly-dev-password";
 
     public static final String PHYSICAL_LOCATION = "Trace Expert City, Colombo";
@@ -37,13 +30,7 @@ public class TestData {
         this.jdbc = jdbc;
     }
 
-    /**
-     * Keeps the two seeded accounts and the tags, removes everything tests
-     * create — including V2's demo events, so list assertions see only their
-     * own rows. The seeded accounts are also restored, since some tests
-     * deactivate or delete them; keeping a row is not the same as keeping it
-     * as it was.
-     */
+    // Also restores the seeded accounts, since some tests deactivate or delete them.
     public void reset() {
         jdbc.update("DELETE FROM rsvp");
         jdbc.update("DELETE FROM event_tag");
@@ -94,7 +81,6 @@ public class TestData {
         jdbc.update("INSERT INTO rsvp (user_id, event_id, status) VALUES (?, ?, ?)", userId, eventId, status.name());
     }
 
-    /** A queue of fresh users at positions 1..count; returns their ids in queue order. */
     public List<Long> insertWaitlist(long eventId, int count) {
         List<Long> userIds = new ArrayList<>();
         for (int position = 1; position <= count; position++) {
@@ -116,7 +102,6 @@ public class TestData {
                 String.class, eventId, userId);
     }
 
-    /** user id -> position, for the current queue, in position order. */
     public Map<Long, Integer> waitlistPositions(long eventId) {
         Map<Long, Integer> positions = new LinkedHashMap<>();
         jdbc.query("SELECT user_id, position FROM rsvp WHERE event_id = ? AND status = ? ORDER BY position",
@@ -127,7 +112,7 @@ public class TestData {
         return positions;
     }
 
-    /** One RSVP each from a fresh user — (user_id, event_id) is unique. */
+    // A fresh user per RSVP: (user_id, event_id) is unique.
     public void insertRsvps(long eventId, RsvpStatus status, int count) {
         for (int i = 0; i < count; i++) {
             insertRsvp(eventId, insertUser(), status);

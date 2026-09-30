@@ -15,21 +15,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Stateless: no session, no cookie, the bearer token is the whole identity —
- * which is also why CSRF protection is off (CSRF abuses cookies the browser
- * sends automatically; a bearer header is never sent automatically).
- *
- * Rules are evaluated top to bottom; anything not listed needs a token.
- */
+// Stateless bearer tokens, no cookies, so CSRF protection is off.
 @Configuration
 @EnableConfigurationProperties(JwtProperties.class)
 public class SecurityConfig {
 
     private static final String[] SWAGGER_PATHS = {"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"};
 
-    // Spring Boot forwards unhandled errors to /error. If that path needed a
-    // token, a failure on a public endpoint would be reported as a 401.
+    // Boot forwards errors to /error; if it needed a token, public-endpoint errors would become 401s.
     private static final String ERROR_PATH = "/error";
 
     @Bean
@@ -40,8 +33,7 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, ApiPaths.AUTH_REGISTER, ApiPaths.AUTH_LOGIN).permitAll()
-                        // Must come before the public rule below: /v1/events/my is
-                        // one path segment too, and the first matching rule wins.
+                        // Must precede the public /* rule below: /my is one segment too, and the first match wins.
                         .requestMatchers(HttpMethod.GET, ApiPaths.EVENTS_MY).authenticated()
                         .requestMatchers(HttpMethod.GET, ApiPaths.EVENTS, ApiPaths.EVENTS_SINGLE_SEGMENT).permitAll()
                         // Public like the event page: counts only, no personal data.

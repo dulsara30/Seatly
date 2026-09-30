@@ -3,7 +3,7 @@ import { Copy } from "@/constants/copy";
 
 interface ErrorStateProps {
   title: string;
-  /** Already user copy - an ApiError's message, never a raw key. */
+  // Already user copy - an ApiError's message, never a raw key.
   message: string;
   onRetry?: () => void;
 }

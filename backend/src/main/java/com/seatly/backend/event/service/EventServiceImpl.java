@@ -47,7 +47,6 @@ public class EventServiceImpl implements EventService {
 
     private static final long NO_CONFIRMED_RSVPS = 0L;
 
-    // Soonest first — what someone browsing for an event to attend wants.
     private static final Sort UPCOMING_EVENTS_ORDER = Sort.by(Sort.Direction.ASC, Event_.EVENT_DATE);
 
     private final EventDao eventDao;
@@ -68,8 +67,7 @@ public class EventServiceImpl implements EventService {
         Set<Tag> tags = findTagsOrThrow(request.tagIds());
 
         Event event = eventMapper.toEntity(request);
-        // A reference, not a load: the organizer is only needed as a foreign
-        // key here, so there is no reason to SELECT the whole user row.
+        // getReferenceById avoids a SELECT: only the organizer's FK is needed.
         event.setOrganizer(userDao.getReferenceById(currentUser.requireId()));
         event.setStatus(EventStatus.UPCOMING);
         event.setTags(tags);
@@ -87,21 +85,13 @@ public class EventServiceImpl implements EventService {
                 events.getTotalElements());
     }
 
-    /** The organiser's own events in every status — the dashboard. Not paged: one organiser's list is short. */
     @Override
     @Transactional(readOnly = true)
     public List<EventResponseDto> getMyEvents() {
         return toResponses(eventDao.findByOrganizerIdAndIsDeletedFalseOrderByEventDateAsc(currentUser.requireId()));
     }
 
-    /**
-     * Takes the same FOR UPDATE lock as updates and RSVPs, so an RSVP in flight
-     * can't confirm into an event while it's being cancelled — it either commits
-     * first, or waits and then sees CANCELLED and is refused.
-     *
-     * RSVP rows are deliberately left as they are: they're the record of who
-     * was coming, which the notification outbox will need to tell them.
-     */
+    // Same FOR UPDATE lock as RSVPs, so an in-flight RSVP can't confirm into a cancelled event.
     @Override
     @Transactional
     public EventDetailResponseDto cancelEvent(Long eventId) {
@@ -115,7 +105,6 @@ public class EventServiceImpl implements EventService {
         return toDetailResponse(event);
     }
 
-    // One grouped count query for the whole list — never one COUNT per event.
     private List<EventResponseDto> toResponses(List<Event> events) {
         Map<Long, Long> confirmedCountByEventId = countConfirmedPerEvent(events);
         return events.stream()
@@ -132,16 +121,11 @@ public class EventServiceImpl implements EventService {
         return toDetailResponse(event);
     }
 
-    /**
-     * Order matters: who (403) before state (400) before content (400), so a
-     * non-organiser learns nothing about the event's internals. Every query
-     * runs before the entity is modified — a query after a modification would
-     * make Hibernate flush the half-validated change to the database first.
-     */
+    // 403 before 400s; every query runs before the entity is modified, or Hibernate flushes it early.
     @Override
     @Transactional
     public EventDetailResponseDto updateEvent(Long eventId, UpdateEventRequestDto request) {
-        // FOR UPDATE: see EventDao — the seat-limit check is check-then-act.
+        // FOR UPDATE: the seat-limit check below is check-then-act.
         Event event = eventDao.findLockedByIdAndIsDeletedFalse(eventId)
                 .orElseThrow(() -> new EntityNotFoundException(EventMessageKey.NOT_FOUND));
 
@@ -151,13 +135,9 @@ public class EventServiceImpl implements EventService {
         applyTagChange(event, request.tagIds());
 
         eventMapper.updateEntity(request, event);
-        // Validated on the merged state: a PATCH may change mode alone, or the
-        // venue field alone, and only the combination can be right or wrong.
-        // Throwing here rolls the transaction back, discarding the change.
+        // Validated on the merged state: a PATCH may change mode or the venue field alone.
         validateVenueForMode(event.getMode(), event.getLocation(), event.getMeetingLink());
         clearVenueFieldUnusedByMode(event);
-        // After every check has passed, still under the same FOR UPDATE lock:
-        // a raised limit frees seats, which go to the front of the waitlist.
         if (request.seatLimit() != null) {
             waitlistManager.rebalance(event);
             // A new limit changes availableSeats even when nobody is promoted.
@@ -167,7 +147,6 @@ public class EventServiceImpl implements EventService {
         return toDetailResponse(event);
     }
 
-    /** The counts a live stream starts from. 404 for an unknown event, before any stream opens. */
     @Override
     @Transactional(readOnly = true)
     public SeatCountDto getSeatCount(Long eventId) {
@@ -186,8 +165,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void applyTagChange(Event event, Set<Long> tagIds) {
-        // null = the client did not send tags, so they stay as they are.
-        // An empty set is different: it removes every tag.
+        // null = tags unchanged; an empty set removes every tag.
         if (tagIds != null) {
             event.setTags(findTagsOrThrow(tagIds));
         }
@@ -208,9 +186,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    // Symmetric: whichever venue field the mode doesn't use is cleared, so a
-    // PHYSICAL -> ONLINE switch can't leave a stale address behind, and an
-    // ONLINE -> PHYSICAL switch can't leave a stale meeting link.
     private void clearVenueFieldUnusedByMode(Event event) {
         switch (event.getMode()) {
             case ONLINE -> event.setLocation(null);
@@ -228,8 +203,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    // Raising the limit is always allowed. Lowering it below the number of
-    // people already confirmed would mean un-confirming someone, so it's refused.
     private void validateSeatLimitCoversConfirmed(Event event, int newSeatLimit) {
         if (newSeatLimit < countConfirmed(event.getId())) {
             throw new ValidationException(EventMessageKey.SEAT_LIMIT_BELOW_CONFIRMED);
@@ -238,8 +211,6 @@ public class EventServiceImpl implements EventService {
 
     private Set<Tag> findTagsOrThrow(Set<Long> tagIds) {
         List<Tag> tags = tagDao.findAllById(tagIds);
-        // tagIds is a Set, so it has no duplicates: any shortfall is an id
-        // that does not exist.
         if (tags.size() != tagIds.size()) {
             throw new ValidationException(EventMessageKey.TAG_NOT_FOUND);
         }
@@ -262,10 +233,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toDetailResponseDtoWithoutMeetingLink(event, availableSeats);
     }
 
-    // A live check on every read, not a one-time grant: cancel your RSVP and
-    // the link disappears from your next response.
-    // Anonymous visitors can read the event (it's a public endpoint) but
-    // never the link.
+    // A live check on every read: cancelling your RSVP hides the link from your next response.
     private boolean canSeeMeetingLink(Event event) {
         Optional<Long> callerId = currentUser.findId();
         if (callerId.isEmpty()) {
@@ -284,7 +252,6 @@ public class EventServiceImpl implements EventService {
         return rsvpDao.countByEventIdAndStatus(eventId, RsvpStatus.CONFIRMED);
     }
 
-    // One grouped query for the whole page — never one COUNT per event.
     private Map<Long, Long> countConfirmedPerEvent(List<Event> events) {
         if (events.isEmpty()) {
             return Map.of();
@@ -294,9 +261,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toMap(EventRsvpCount::eventId, EventRsvpCount::rsvpCount));
     }
 
-    // An event missing from the grouped result genuinely has zero confirmed
-    // RSVPs — GROUP BY only returns groups that exist. This zero is the real
-    // count, not a default standing in for missing data.
+    // Missing from the GROUP BY result means genuinely zero confirmed RSVPs, not missing data.
     private long confirmedCountOf(Event event, Map<Long, Long> confirmedCountByEventId) {
         return confirmedCountByEventId.getOrDefault(event.getId(), NO_CONFIRMED_RSVPS);
     }

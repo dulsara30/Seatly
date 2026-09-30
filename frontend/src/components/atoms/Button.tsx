@@ -10,11 +10,7 @@ export type ButtonVariant =
   | "danger";
 export type ButtonSize = "medium" | "small";
 
-/**
- * primary (black) is the default emphasis. accent (yellow) is reserved for
- * the ONE main call to action on a screen - reserve a seat, publish, create.
- * Two accent buttons on one screen means one of them is wrong.
- */
+// accent (yellow) is for the one main CTA on a screen; two accents means one is wrong.
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-black text-white hover:bg-black/85",
   accent: "bg-yellow-500 text-black hover:bg-yellow-600",
@@ -78,7 +74,6 @@ export function Button({
 
 type LinkButtonProps = StyleProps & ComponentProps<typeof Link>;
 
-/** Looks like a Button, behaves like a link - for actions that are really navigation. */
 export function LinkButton({
   variant,
   size,

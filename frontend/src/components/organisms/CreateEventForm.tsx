@@ -54,8 +54,7 @@ function initialValues(): CreateEventFormValues {
   };
 }
 
-// Only the field the mode uses is sent; the other is null, as the backend
-// would store it anyway. Blank optional text is null, not "".
+// Only the venue field the mode uses is sent (the other null); blank optional text is null.
 function toRequest(values: CreateEventFormValues): CreateEventRequest {
   return {
     name: values.name.trim(),
@@ -75,7 +74,6 @@ function toRequest(values: CreateEventFormValues): CreateEventRequest {
   };
 }
 
-/** 07 Create Event - the form, and beside it the card exactly as attendees will see it. */
 export function CreateEventForm() {
   const router = useRouter();
   const session = useSession();
@@ -174,7 +172,6 @@ export function CreateEventForm() {
               value={formik.values.mode}
               onChange={(mode) => void formik.setFieldValue("mode", mode)}
             />
-            {/* The mode decides which venue field exists - never both. */}
             {formik.values.mode === EventMode.PHYSICAL ? (
               <Input
                 label={Copy.eventForm.location}

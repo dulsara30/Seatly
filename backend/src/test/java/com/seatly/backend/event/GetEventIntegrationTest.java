@@ -31,7 +31,6 @@ class GetEventIntegrationTest extends AbstractIntegrationTest {
         assertThat(result).bodyJson().extractingPath("$.results[0].description").isEqualTo("Test event");
     }
 
-    // Only CONFIRMED RSVPs take a seat — waitlisted and cancelled ones don't.
     @Test
     void availableSeatsCountOnlyConfirmedRsvps() {
         long eventId = ownEvent(EventMode.PHYSICAL);
@@ -42,7 +41,7 @@ class GetEventIntegrationTest extends AbstractIntegrationTest {
         assertThat(get(eventId)).bodyJson().extractingPath("$.results[0].availableSeats").isEqualTo(SEAT_LIMIT - 3);
     }
 
-    // Detail is not limited to UPCOMING — a cancelled event can still be viewed.
+    // Unlike the list, detail isn't limited to UPCOMING.
     @Test
     void returnsCancelledEvent() {
         long eventId = testData.insertEvent(TestData.SEEDED_ORGANISER_ID, "Cancelled", EventMode.PHYSICAL,
@@ -69,8 +68,6 @@ class GetEventIntegrationTest extends AbstractIntegrationTest {
         assertError(mvc.get().uri("/v1/events/abc").exchange(), HttpStatus.BAD_REQUEST,
                 CommonMessageKeys.INVALID_PARAMETER);
     }
-
-    // meetingLink — a live permission check, not public data.
 
     @Test
     void showsMeetingLinkToOrganiser() {

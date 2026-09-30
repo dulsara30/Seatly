@@ -12,15 +12,11 @@ const TONE_CLASSES: Record<ToastTone, string> = {
 };
 
 interface ToastProps extends ToastMessage {
-  /** Takes the id, so the parent can pass one stable function for every toast. */
+  // Takes the id, so the parent can pass one stable function for every toast.
   onDismiss: (id: number) => void;
 }
 
-/**
- * Dismisses itself after TOAST_DURATION_MS. The timer depends only on stable
- * values (the id and the store's dismiss), so a new toast arriving doesn't
- * restart the countdown of the ones already showing.
- */
+// Timer deps are stable (id, dismiss), so a new toast doesn't restart the others' countdowns.
 export function Toast({ id, tone, message, onDismiss }: ToastProps) {
   useEffect(() => {
     const timer = setTimeout(() => onDismiss(id), TOAST_DURATION_MS);

@@ -4,7 +4,6 @@ import { Providers } from "@/app/Providers";
 import { AppShell } from "@/components/templates/AppShell";
 import "./globals.css";
 
-// Self-hosted by next/font at build time: no request to Google from the browser.
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],

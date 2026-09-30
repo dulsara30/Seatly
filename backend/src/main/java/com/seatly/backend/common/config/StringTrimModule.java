@@ -7,12 +7,7 @@ import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.deser.std.StdDeserializer;
 import tools.jackson.databind.module.SimpleModule;
 
-/**
- * Registered as a Spring bean of type tools.jackson.databind.JacksonModule
- * (SimpleModule implements it) so Boot's Jackson auto-configuration picks
- * it up automatically alongside its other module beans — no explicit
- * ObjectMapper wiring needed.
- */
+// Trims every JSON string; as a JacksonModule bean, Boot registers it automatically.
 @Component
 public class StringTrimModule extends SimpleModule {
 
