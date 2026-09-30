@@ -37,7 +37,9 @@ async function forwardToBackend(
   }
 
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
-  const headers = new Headers({ Accept: JSON_CONTENT_TYPE });
+  // The browser's own Accept, not a fixed JSON one: the seat stream only
+  // produces text/event-stream, and Spring answers 406 to anything else.
+  const headers = new Headers({ Accept: request.headers.get("accept") ?? JSON_CONTENT_TYPE });
   const contentType = request.headers.get("content-type");
   if (contentType) {
     headers.set("content-type", contentType);
@@ -56,6 +58,10 @@ async function forwardToBackend(
         body: METHODS_WITHOUT_BODY.has(request.method)
           ? undefined
           : await request.text(),
+        // Aborts the upstream call when the browser goes away. For a live
+        // stream this is what lets Spring notice a closed tab and free its
+        // registry slot, instead of holding it until the next failed write.
+        signal: request.signal,
       },
     );
   } catch {

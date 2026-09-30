@@ -12,6 +12,7 @@ import com.seatly.backend.event.payload.CreateEventRequestDto;
 import com.seatly.backend.event.payload.EventDetailResponseDto;
 import com.seatly.backend.event.payload.EventFilterDto;
 import com.seatly.backend.event.payload.EventResponseDto;
+import com.seatly.backend.event.payload.SeatCountDto;
 import com.seatly.backend.event.payload.UpdateEventRequestDto;
 import com.seatly.backend.event.repository.EventDao;
 import com.seatly.backend.event.type.EventMessageKey;
@@ -56,6 +57,7 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final CurrentUser currentUser;
     private final WaitlistManager waitlistManager;
+    private final SeatCountPublisher seatCountPublisher;
     private final Clock clock;
 
     @Override
@@ -158,9 +160,20 @@ public class EventServiceImpl implements EventService {
         // a raised limit frees seats, which go to the front of the waitlist.
         if (request.seatLimit() != null) {
             waitlistManager.rebalance(event);
+            // A new limit changes availableSeats even when nobody is promoted.
+            seatCountPublisher.publishChange(event);
         }
 
         return toDetailResponse(event);
+    }
+
+    /** The counts a live stream starts from. 404 for an unknown event, before any stream opens. */
+    @Override
+    @Transactional(readOnly = true)
+    public SeatCountDto getSeatCount(Long eventId) {
+        Event event = eventDao.findByIdAndIsDeletedFalse(eventId)
+                .orElseThrow(() -> new EntityNotFoundException(EventMessageKey.NOT_FOUND));
+        return seatCountPublisher.snapshot(event);
     }
 
     private void validateUpdatedFields(Event event, UpdateEventRequestDto request) {

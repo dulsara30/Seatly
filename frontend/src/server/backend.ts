@@ -47,12 +47,24 @@ export function isAllowedOrigin(request: NextRequest): boolean {
   return URL.canParse(origin) && new URL(origin).host === host;
 }
 
-/** Spring's response, passed to the browser unchanged: status, body and content type. */
+/**
+ * Response headers worth keeping on the way through. cache-control carries
+ * the stream's no-transform (stops gzip buffering it); x-accel-buffering
+ * stops an Nginx in front of Next from buffering it.
+ */
+const RELAYED_HEADERS = ["content-type", "cache-control", "x-accel-buffering"];
+
+/**
+ * Spring's response, passed to the browser unchanged: status, a streamed body
+ * (never buffered — a live SSE response flows straight through) and headers.
+ */
 export function relayBackendResponse(backendResponse: Response): NextResponse {
   const headers = new Headers();
-  const contentType = backendResponse.headers.get("content-type");
-  if (contentType) {
-    headers.set("content-type", contentType);
+  for (const name of RELAYED_HEADERS) {
+    const value = backendResponse.headers.get(name);
+    if (value) {
+      headers.set(name, value);
+    }
   }
   return new NextResponse(backendResponse.body, {
     status: backendResponse.status,

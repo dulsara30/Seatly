@@ -44,6 +44,8 @@ public class SecurityConfig {
                         // one path segment too, and the first matching rule wins.
                         .requestMatchers(HttpMethod.GET, ApiPaths.EVENTS_MY).authenticated()
                         .requestMatchers(HttpMethod.GET, ApiPaths.EVENTS, ApiPaths.EVENTS_SINGLE_SEGMENT).permitAll()
+                        // Public like the event page: counts only, no personal data.
+                        .requestMatchers(HttpMethod.GET, ApiPaths.EVENT_STREAM).permitAll()
                         .requestMatchers(SWAGGER_PATHS).permitAll()
                         .requestMatchers(ERROR_PATH).permitAll()
                         .anyRequest().authenticated())
