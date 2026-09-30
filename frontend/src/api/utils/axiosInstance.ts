@@ -23,7 +23,11 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
     const apiError = toApiError(error);
-    if (apiError.status === HttpStatus.UNAUTHORIZED && axios.isAxiosError(error) && error.config) {
+    if (
+      apiError.status === HttpStatus.UNAUTHORIZED &&
+      axios.isAxiosError(error) &&
+      error.config
+    ) {
       endExpiredSession(error.config);
     }
     return Promise.reject(apiError);
@@ -42,13 +46,18 @@ function toApiError(error: unknown): ApiError {
     return ApiError.fromEnvelope(response.status, response.data);
   }
   // A body that isn't our envelope (an HTML error page from a gateway, say).
-  return ApiError.of(response.status, response.status >= HttpStatus.SERVER_ERROR_FLOOR ? "SERVICE_UNAVAILABLE" : "UNKNOWN_ERROR");
+  return ApiError.of(
+    response.status,
+    response.status >= HttpStatus.SERVER_ERROR_FLOOR
+      ? "SERVICE_UNAVAILABLE"
+      : "UNKNOWN_ERROR",
+  );
 }
 
 let redirectingToLogin = false;
 
 /**
- * A 401 means "the session you had is gone" — expired or revoked token. The
+ * A 401 means "the session you had is gone" - expired or revoked token. The
  * proxy route has already cleared the cookie; here the browser side follows:
  * drop every cached response (it belonged to that user) and go to login.
  *
@@ -58,7 +67,7 @@ let redirectingToLogin = false;
  *  - Never for the login call itself: a wrong password is also a 401, and
  *    must show as an error on the form, not reload the page.
  *  - The flag stops parallel 401s each starting a redirect. A full page load
- *    (not client navigation) then resets everything, flag included — and
+ *    (not client navigation) then resets everything, flag included - and
  *    wipes any in-memory state of the previous user with it.
  */
 function endExpiredSession(requestConfig: InternalAxiosRequestConfig): void {
@@ -66,7 +75,9 @@ function endExpiredSession(requestConfig: InternalAxiosRequestConfig): void {
     return;
   }
   const queryClient = getQueryClient();
-  const session = queryClient.getQueryData<SessionResponse>(QueryKeys.auth.session);
+  const session = queryClient.getQueryData<SessionResponse>(
+    QueryKeys.auth.session,
+  );
   if (session?.user == null) {
     return;
   }
@@ -78,5 +89,7 @@ function endExpiredSession(requestConfig: InternalAxiosRequestConfig): void {
   // in-memory state the previous session left behind. (This also runs outside
   // React, where there is no router to push with.)
   // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-  window.location.assign(`${Routes.login}?${new URLSearchParams({ [RETURN_TO_PARAM]: returnTo })}`);
+  window.location.assign(
+    `${Routes.signIn}?${new URLSearchParams({ [RETURN_TO_PARAM]: returnTo })}`,
+  );
 }

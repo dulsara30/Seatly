@@ -19,6 +19,7 @@ public interface RsvpMapper {
     @Mapping(target = "eventId", source = "event.id")
     @Mapping(target = "eventName", source = "event.name")
     @Mapping(target = "eventDate", source = "event.eventDate")
+    @Mapping(target = "eventStatus", source = "event.status")
     MyRsvpResponseDto toMyRsvpResponseDto(Rsvp rsvp);
 
     @Mapping(target = "userId", source = "user.id")

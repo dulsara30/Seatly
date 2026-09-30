@@ -13,27 +13,47 @@ import type {
 } from "@/types/responses/RsvpResponse";
 
 const createRsvp = async (eventId: Id): Promise<RsvpResponse> =>
-  unwrapOne(await axiosInstance.post<ApiEnvelope<RsvpResponse>>(ApiEndpoints.events.rsvp(eventId)));
+  unwrapOne(
+    await axiosInstance.post<ApiEnvelope<RsvpResponse>>(
+      ApiEndpoints.events.rsvp(eventId),
+    ),
+  );
 
 const cancelRsvp = async (eventId: Id): Promise<RsvpResponse> =>
-  unwrapOne(await axiosInstance.delete<ApiEnvelope<RsvpResponse>>(ApiEndpoints.events.rsvp(eventId)));
+  unwrapOne(
+    await axiosInstance.delete<ApiEnvelope<RsvpResponse>>(
+      ApiEndpoints.events.rsvp(eventId),
+    ),
+  );
 
 const fetchAttendees = async (eventId: Id): Promise<AttendeeListResponse> =>
-  unwrapOne(await axiosInstance.get<ApiEnvelope<AttendeeListResponse>>(ApiEndpoints.events.attendees(eventId)));
+  unwrapOne(
+    await axiosInstance.get<ApiEnvelope<AttendeeListResponse>>(
+      ApiEndpoints.events.attendees(eventId),
+    ),
+  );
 
-// These two return the list AS the envelope's results — see envelope.ts.
+// These two return the list AS the envelope's results - see envelope.ts.
 const fetchWaitlist = async (eventId: Id): Promise<WaitlistEntryResponse[]> =>
-  unwrapMany(await axiosInstance.get<ApiEnvelope<WaitlistEntryResponse>>(ApiEndpoints.events.waitlist(eventId)));
+  unwrapMany(
+    await axiosInstance.get<ApiEnvelope<WaitlistEntryResponse>>(
+      ApiEndpoints.events.waitlist(eventId),
+    ),
+  );
 
 const fetchMyRsvps = async (): Promise<MyRsvpResponse[]> =>
-  unwrapMany(await axiosInstance.get<ApiEnvelope<MyRsvpResponse>>(ApiEndpoints.rsvps.my));
+  unwrapMany(
+    await axiosInstance.get<ApiEnvelope<MyRsvpResponse>>(ApiEndpoints.rsvps.my),
+  );
 
 /**
  * An RSVP or a cancellation moves seat counts on every list and detail view,
- * can promote someone off the waitlist, and changes "my RSVPs" — so both
+ * can promote someone off the waitlist, and changes "my RSVPs" - so both
  * mutations refresh the whole events tree and the caller's own list.
  */
-const useRsvpMutation = (mutationFn: (eventId: Id) => Promise<RsvpResponse>) => {
+const useRsvpMutation = (
+  mutationFn: (eventId: Id) => Promise<RsvpResponse>,
+) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
@@ -48,22 +68,24 @@ export const useCreateRsvp = () => useRsvpMutation(createRsvp);
 
 export const useCancelRsvp = () => useRsvpMutation(cancelRsvp);
 
-/** Organiser only — anyone else gets a 403. */
+/** Organiser only - anyone else gets a 403. */
 export const useAttendees = (eventId: Id) =>
   useQuery({
     queryKey: QueryKeys.events.attendees(eventId),
     queryFn: () => fetchAttendees(eventId),
   });
 
-/** Organiser only — anyone else gets a 403. */
+/** Organiser only - anyone else gets a 403. */
 export const useWaitlist = (eventId: Id) =>
   useQuery({
     queryKey: QueryKeys.events.waitlist(eventId),
     queryFn: () => fetchWaitlist(eventId),
   });
 
-export const useMyRsvps = () =>
+/** Requires a session - pass enabled: false for anonymous visitors rather than letting it 401. */
+export const useMyRsvps = ({ enabled }: { enabled: boolean }) =>
   useQuery({
     queryKey: QueryKeys.rsvps.my,
     queryFn: fetchMyRsvps,
+    enabled,
   });

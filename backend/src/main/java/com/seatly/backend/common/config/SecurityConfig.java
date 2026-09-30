@@ -40,6 +40,9 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, ApiPaths.AUTH_REGISTER, ApiPaths.AUTH_LOGIN).permitAll()
+                        // Must come before the public rule below: /v1/events/my is
+                        // one path segment too, and the first matching rule wins.
+                        .requestMatchers(HttpMethod.GET, ApiPaths.EVENTS_MY).authenticated()
                         .requestMatchers(HttpMethod.GET, ApiPaths.EVENTS, ApiPaths.EVENTS_SINGLE_SEGMENT).permitAll()
                         .requestMatchers(SWAGGER_PATHS).permitAll()
                         .requestMatchers(ERROR_PATH).permitAll()

@@ -81,14 +81,45 @@ public class EventServiceImpl implements EventService {
     public PageDto<EventResponseDto> getUpcomingEvents(EventFilterDto filter, int page, int size) {
         Page<Event> events = eventDao.findUpcoming(
                 normalizeTagFilter(filter), PageRequest.of(page, size, UPCOMING_EVENTS_ORDER));
-        Map<Long, Long> confirmedCountByEventId = countConfirmedPerEvent(events.getContent());
+        return new PageDto<>(toResponses(events.getContent()), events.getNumber(), events.getTotalPages(),
+                events.getTotalElements());
+    }
 
-        List<EventResponseDto> items = events.getContent().stream()
+    /** The organiser's own events in every status — the dashboard. Not paged: one organiser's list is short. */
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventResponseDto> getMyEvents() {
+        return toResponses(eventDao.findByOrganizerIdAndIsDeletedFalseOrderByEventDateAsc(currentUser.requireId()));
+    }
+
+    /**
+     * Takes the same FOR UPDATE lock as updates and RSVPs, so an RSVP in flight
+     * can't confirm into an event while it's being cancelled — it either commits
+     * first, or waits and then sees CANCELLED and is refused.
+     *
+     * RSVP rows are deliberately left as they are: they're the record of who
+     * was coming, which the notification outbox will need to tell them.
+     */
+    @Override
+    @Transactional
+    public EventDetailResponseDto cancelEvent(Long eventId) {
+        Event event = eventDao.findLockedByIdAndIsDeletedFalse(eventId)
+                .orElseThrow(() -> new EntityNotFoundException(EventMessageKey.NOT_FOUND));
+
+        validateCallerIsOrganizer(event);
+        validateIsUpcoming(event);
+        event.setStatus(EventStatus.CANCELLED);
+
+        return toDetailResponse(event);
+    }
+
+    // One grouped count query for the whole list — never one COUNT per event.
+    private List<EventResponseDto> toResponses(List<Event> events) {
+        Map<Long, Long> confirmedCountByEventId = countConfirmedPerEvent(events);
+        return events.stream()
                 .map(event -> eventMapper.toResponseDto(
                         event, availableSeats(event, confirmedCountOf(event, confirmedCountByEventId))))
                 .toList();
-
-        return new PageDto<>(items, events.getNumber(), events.getTotalPages(), events.getTotalElements());
     }
 
     @Override

@@ -18,14 +18,17 @@ const METHODS_WITHOUT_BODY = new Set(["GET", "HEAD"]);
  * "Authorization: Bearer <token>". This is the only place the token is read
  * for API calls, and it never leaves the server.
  */
-async function forwardToBackend(request: NextRequest, context: RouteContext<"/api/proxy/[...path]">) {
+async function forwardToBackend(
+  request: NextRequest,
+  context: RouteContext<"/api/proxy/[...path]">,
+) {
   if (!isAllowedOrigin(request)) {
     return errorResponse(HttpStatus.FORBIDDEN, "ACCESS_DENIED");
   }
 
   // Each segment is re-encoded so a crafted path can't escape the backend:
   // unencoded, a leading empty segment would produce "//host", which URL
-  // resolution treats as a different server — the proxy would then send the
+  // resolution treats as a different server - the proxy would then send the
   // user's token wherever the attacker pointed it.
   const { path } = await context.params;
   const backendPath = `/${path.map(encodeURIComponent).join("/")}`;
@@ -45,11 +48,16 @@ async function forwardToBackend(request: NextRequest, context: RouteContext<"/ap
 
   let backendResponse: Response;
   try {
-    backendResponse = await callBackend(`${backendPath}${request.nextUrl.search}`, {
-      method: request.method,
-      headers,
-      body: METHODS_WITHOUT_BODY.has(request.method) ? undefined : await request.text(),
-    });
+    backendResponse = await callBackend(
+      `${backendPath}${request.nextUrl.search}`,
+      {
+        method: request.method,
+        headers,
+        body: METHODS_WITHOUT_BODY.has(request.method)
+          ? undefined
+          : await request.text(),
+      },
+    );
   } catch {
     return backendUnavailable();
   }

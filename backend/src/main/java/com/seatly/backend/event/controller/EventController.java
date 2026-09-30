@@ -71,6 +71,28 @@ public class EventController {
         return ResponseEntity.ok(ResponseEntityDto.success(eventService.getUpcomingEvents(filter, page, size)));
     }
 
+    // A literal segment beats the {eventId} pattern in Spring's matching, so
+    // "/my" is never parsed as an id.
+    @GetMapping("/my")
+    @Operation(summary = "List my events", description = "Events the caller organises, every status, soonest first.")
+    @ApiResponse(responseCode = ApiResponseCodes.OK, description = "The caller's events")
+    @ApiResponse(responseCode = ApiResponseCodes.UNAUTHORIZED, description = "Missing, invalid or expired token")
+    public ResponseEntity<ResponseEntityDto<EventResponseDto>> getMyEvents() {
+        return ResponseEntity.ok(ResponseEntityDto.success(eventService.getMyEvents()));
+    }
+
+    @PostMapping("/{eventId}/cancel")
+    @Operation(summary = "Cancel an event",
+            description = "Organiser only. Irreversible: the event becomes CANCELLED and stops accepting RSVPs.")
+    @ApiResponse(responseCode = ApiResponseCodes.OK, description = "Event cancelled")
+    @ApiResponse(responseCode = ApiResponseCodes.BAD_REQUEST, description = "Event is already cancelled or completed")
+    @ApiResponse(responseCode = ApiResponseCodes.UNAUTHORIZED, description = "Missing, invalid or expired token")
+    @ApiResponse(responseCode = ApiResponseCodes.FORBIDDEN, description = "Caller is not the organiser")
+    @ApiResponse(responseCode = ApiResponseCodes.NOT_FOUND, description = "No such event, or it was deleted")
+    public ResponseEntity<ResponseEntityDto<EventDetailResponseDto>> cancelEvent(@PathVariable Long eventId) {
+        return ResponseEntity.ok(ResponseEntityDto.success(eventService.cancelEvent(eventId)));
+    }
+
     @GetMapping("/{eventId}")
     @Operation(summary = "Get an event",
             description = "Public. meetingLink is included only when the token belongs to the organiser "

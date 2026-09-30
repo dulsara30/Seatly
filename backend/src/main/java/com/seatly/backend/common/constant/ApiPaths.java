@@ -20,6 +20,10 @@ public final class ApiPaths {
     // it gets its own rule listed above this one in SecurityConfig.
     public static final String EVENTS_SINGLE_SEGMENT = EVENTS + "/*";
 
+    // Also matched by EVENTS_SINGLE_SEGMENT, so SecurityConfig lists it first.
+    public static final String EVENTS_MY = EVENTS + "/my";
+    public static final String EVENT_CANCEL = EVENTS + "/{eventId}/cancel";
+
     public static final String EVENT_RSVP = EVENTS + "/{eventId}/rsvp";
     public static final String EVENT_ATTENDEES = EVENTS + "/{eventId}/attendees";
     public static final String EVENT_WAITLIST = EVENTS + "/{eventId}/waitlist";
