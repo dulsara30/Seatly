@@ -12,13 +12,16 @@ import {
   successResponse,
 } from "@/server/backend";
 import type { ApiEnvelope } from "@/types/responses/ApiEnvelope";
-import type { BackendAuthResponse, SessionResponse } from "@/types/responses/AuthResponse";
+import type {
+  BackendAuthResponse,
+  SessionResponse,
+} from "@/types/responses/AuthResponse";
 
 /**
  * Login is the one call that can't go through the generic proxy: Spring
  * returns the token in the JSON body, and it has to be moved into the
  * httpOnly cookie before anything reaches the browser. The browser gets the
- * user only — the token never exists in page JavaScript.
+ * user only - the token never exists in page JavaScript.
  */
 export async function POST(request: NextRequest) {
   if (!isAllowedOrigin(request)) {
@@ -42,7 +45,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Trusted: this is our own backend's documented response shape.
-  const envelope: ApiEnvelope<BackendAuthResponse> = await backendResponse.json();
+  const envelope: ApiEnvelope<BackendAuthResponse> =
+    await backendResponse.json();
   const [auth] = envelope.results;
   if (auth === undefined) {
     return errorResponse(HttpStatus.BAD_GATEWAY, "UNKNOWN_ERROR");

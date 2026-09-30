@@ -4,7 +4,7 @@ import type { Tag } from "@/types/entities/Tag";
 import type { UserSummary } from "@/types/entities/User";
 
 /**
- * event/payload/EventResponseDto.java — the list card. availableSeats is
+ * event/payload/EventResponseDto.java - the list card. availableSeats is
  * derived by the backend (seatLimit − confirmed); never compute it here.
  */
 export interface EventResponse {
@@ -21,7 +21,7 @@ export interface EventResponse {
 }
 
 /**
- * event/payload/EventDetailResponseDto.java — adds description and
+ * event/payload/EventDetailResponseDto.java - adds description and
  * meetingLink. meetingLink is null for PHYSICAL events AND for callers who
  * aren't the organiser or a confirmed attendee; `mode` tells the two apart.
  */

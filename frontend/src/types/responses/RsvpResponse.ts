@@ -1,23 +1,28 @@
-import type { RsvpStatus } from "@/types/entities/enums";
+import type { EventStatus, RsvpStatus } from "@/types/entities/enums";
 import type { Id, LocalDateTimeString } from "@/types/entities/primitives";
 
-/** rsvp/payload/RsvpResponseDto.java — position is set only while WAITLISTED; 1 is next in line. */
+/** rsvp/payload/RsvpResponseDto.java - position is set only while WAITLISTED; 1 is next in line. */
 export interface RsvpResponse {
   eventId: Id;
   status: RsvpStatus;
   position: number | null;
 }
 
-/** rsvp/payload/MyRsvpResponseDto.java — only active RSVPs are returned. */
+/**
+ * rsvp/payload/MyRsvpResponseDto.java - only active RSVPs are returned. An
+ * RSVP stays active when its event is cancelled, so eventStatus says whether
+ * the event is still on.
+ */
 export interface MyRsvpResponse {
   eventId: Id;
   eventName: string;
   eventDate: LocalDateTimeString;
+  eventStatus: EventStatus;
   status: RsvpStatus;
   position: number | null;
 }
 
-/** rsvp/payload/AttendeeResponseDto.java — organiser-only, so it carries email. */
+/** rsvp/payload/AttendeeResponseDto.java - organiser-only, so it carries email. */
 export interface AttendeeResponse {
   userId: Id;
   name: string;
@@ -32,7 +37,7 @@ export interface AttendeeListResponse {
   seatLimit: number;
 }
 
-/** rsvp/payload/WaitlistEntryResponseDto.java — organiser-only. */
+/** rsvp/payload/WaitlistEntryResponseDto.java - organiser-only. */
 export interface WaitlistEntryResponse {
   userId: Id;
   name: string;

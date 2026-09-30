@@ -1,0 +1,57 @@
+# Continuous build for the Next.js frontend: types, lint (including the
+# design-token check), and a production build. No backend is needed — the
+# build never calls Spring, and API_BASE_URL is only read at request time.
+name: Frontend build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-build.yml"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-build.yml"
+
+permissions:
+  contents: read
+
+# A newer push to the same branch cancels the run it makes obsolete.
+concurrency:
+  group: frontend-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Typecheck, lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # ci, not install: fails if package-lock.json and package.json disagree,
+      # so CI builds exactly the dependency tree that was committed.
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # ESLint, then scripts/check-design-tokens.mjs — no arbitrary Tailwind
+      # values or raw colours anywhere outside globals.css.
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build

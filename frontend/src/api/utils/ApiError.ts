@@ -5,7 +5,7 @@ export interface ApiErrorDetail {
   key: MessageKey;
   /** The user-facing copy for `key`, from constants/messages.ts. */
   message: string;
-  /** Set for Bean Validation failures — which request field was rejected. */
+  /** Set for Bean Validation failures - which request field was rejected. */
   field: string | null;
 }
 
@@ -17,10 +17,13 @@ export interface ApiErrorDetail {
 export class ApiError extends Error {
   /** null when the request never got an HTTP response (network failure). */
   readonly status: number | null;
-  /** Never empty — the type guarantees there is always a first reason. */
+  /** Never empty - the type guarantees there is always a first reason. */
   readonly details: readonly [ApiErrorDetail, ...ApiErrorDetail[]];
 
-  private constructor(status: number | null, details: readonly [ApiErrorDetail, ...ApiErrorDetail[]]) {
+  private constructor(
+    status: number | null,
+    details: readonly [ApiErrorDetail, ...ApiErrorDetail[]],
+  ) {
     super(details.map((errorDetail) => errorDetail.message).join(" "));
     this.name = "ApiError";
     this.status = status;
@@ -51,7 +54,7 @@ export class ApiError extends Error {
 /**
  * The backend is the source of these keys, and a newer backend can send one
  * this build doesn't know yet. That's a real boundary, so an unknown key
- * becomes UNKNOWN_ERROR — and is logged in development so the missing entry
+ * becomes UNKNOWN_ERROR - and is logged in development so the missing entry
  * in messages.ts gets noticed rather than hidden.
  */
 function detail(rawKey: string, field: string | null): ApiErrorDetail {
@@ -59,7 +62,9 @@ function detail(rawKey: string, field: string | null): ApiErrorDetail {
     return { key: rawKey, message: MESSAGES[rawKey], field };
   }
   if (process.env.NODE_ENV === "development") {
-    console.warn(`No copy for backend message key "${rawKey}" — add it to constants/messages.ts`);
+    console.warn(
+      `No copy for backend message key "${rawKey}" - add it to constants/messages.ts`,
+    );
   }
   return { key: "UNKNOWN_ERROR", message: MESSAGES.UNKNOWN_ERROR, field };
 }

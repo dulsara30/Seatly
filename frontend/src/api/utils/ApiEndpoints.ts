@@ -10,7 +10,7 @@ import type { Id } from "@/types/entities/primitives";
  *  - Everything else, reached through the proxy route, which attaches the
  *    token from that cookie and forwards to Spring.
  */
-/** axiosInstance's baseURL — every browser call is same-origin, into Next. */
+/** axiosInstance's baseURL - every browser call is same-origin, into Next. */
 export const API_BASE_PATH = "/api";
 
 const PROXY = "/proxy";
@@ -26,9 +26,12 @@ export const ApiEndpoints = {
   },
   events: {
     list: viaProxy(BackendPaths.events.list),
+    my: viaProxy(BackendPaths.events.my),
+    cancel: (eventId: Id) => viaProxy(BackendPaths.events.cancel(eventId)),
     detail: (eventId: Id) => viaProxy(BackendPaths.events.detail(eventId)),
     rsvp: (eventId: Id) => viaProxy(BackendPaths.events.rsvp(eventId)),
-    attendees: (eventId: Id) => viaProxy(BackendPaths.events.attendees(eventId)),
+    attendees: (eventId: Id) =>
+      viaProxy(BackendPaths.events.attendees(eventId)),
     waitlist: (eventId: Id) => viaProxy(BackendPaths.events.waitlist(eventId)),
   },
   rsvps: {

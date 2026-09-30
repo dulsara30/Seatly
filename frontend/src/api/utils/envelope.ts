@@ -1,8 +1,11 @@
 import type { AxiosResponse } from "axios";
-import type { ApiEnvelope, ApiErrorEnvelope } from "@/types/responses/ApiEnvelope";
+import type {
+  ApiEnvelope,
+  ApiErrorEnvelope,
+} from "@/types/responses/ApiEnvelope";
 
 /**
- * Where the { status, results } envelope is removed — once, in the API
+ * Where the { status, results } envelope is removed - once, in the API
  * layer, so hooks and components only ever hold payload types.
  *
  * Deliberately NOT in an axios response interceptor. An interceptor that
@@ -18,9 +21,11 @@ import type { ApiEnvelope, ApiErrorEnvelope } from "@/types/responses/ApiEnvelop
 export function unwrapOne<T>(response: AxiosResponse<ApiEnvelope<T>>): T {
   const { results } = response.data;
   const [only] = results;
-  // A contract violation, not a user error — surface it loudly.
+  // A contract violation, not a user error - surface it loudly.
   if (results.length !== 1 || only === undefined) {
-    throw new Error(`Expected exactly one result from ${response.config.url}, got ${results.length}`);
+    throw new Error(
+      `Expected exactly one result from ${response.config.url}, got ${results.length}`,
+    );
   }
   return only;
 }

@@ -1,7 +1,7 @@
 import type { Id } from "@/types/entities/primitives";
 
 /**
- * The Spring backend's own paths — mirrors common/constant/ApiPaths.java.
+ * The Spring backend's own paths - mirrors common/constant/ApiPaths.java.
  * The browser never calls these directly: they are reached through the Next
  * proxy (see ApiEndpoints), and the Next server uses them for login and the
  * session check.
@@ -14,6 +14,9 @@ export const BackendPaths = {
   },
   events: {
     list: "/v1/events",
+    // results = the caller's own events, every status (not paged)
+    my: "/v1/events/my",
+    cancel: (eventId: Id) => `/v1/events/${eventId}/cancel`,
     detail: (eventId: Id) => `/v1/events/${eventId}`,
     rsvp: (eventId: Id) => `/v1/events/${eventId}/rsvp`,
     attendees: (eventId: Id) => `/v1/events/${eventId}/attendees`,

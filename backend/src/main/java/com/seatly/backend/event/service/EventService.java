@@ -6,6 +6,7 @@ import com.seatly.backend.event.payload.EventDetailResponseDto;
 import com.seatly.backend.event.payload.EventFilterDto;
 import com.seatly.backend.event.payload.EventResponseDto;
 import com.seatly.backend.event.payload.UpdateEventRequestDto;
+import java.util.List;
 
 public interface EventService {
 
@@ -16,4 +17,8 @@ public interface EventService {
     EventDetailResponseDto getEventById(Long eventId);
 
     EventDetailResponseDto updateEvent(Long eventId, UpdateEventRequestDto request);
+
+    List<EventResponseDto> getMyEvents();
+
+    EventDetailResponseDto cancelEvent(Long eventId);
 }

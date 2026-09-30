@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 /*
- * Seatly design tokens — the only values the UI may use.
+ * Seatly design tokens - the only values the UI may use.
  *
  * Every `--x-*: initial;` line deletes Tailwind's built-in values for that
  * group, so a class outside the design system (bg-blue-500, rounded-2xl,
- * shadow-md) simply doesn't exist. Arbitrary values — a utility followed by a
- * square-bracketed raw value — would still compile, so `npm run lint` rejects
+ * shadow-md) simply doesn't exist. Arbitrary values - a utility followed by a
+ * square-bracketed raw value - would still compile, so `npm run lint` rejects
  * them separately: see scripts/check-design-tokens.mjs.
  *
  * YELLOW IS AN ACCENT, NEVER A BACKGROUND. A filled yellow surface appears in
@@ -60,7 +60,7 @@
 
   /* Type scale from the Figma "Typography" frame: size and weight as
      designed. Line heights and letter spacing aren't specified there, so
-     these are chosen defaults — tight for large headings, open for body. */
+     these are chosen defaults - tight for large headings, open for body. */
   --text-*: initial;
   --text-display: 48px;
   --text-display--line-height: 1.1;

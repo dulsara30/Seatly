@@ -3,6 +3,7 @@ package com.seatly.backend.event.repository;
 import com.seatly.backend.event.model.Event;
 import com.seatly.backend.event.model.Event_;
 import jakarta.persistence.LockModeType;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,8 @@ public interface EventDao extends JpaRepository<Event, Long>, EventRepository {
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Event> findLockedByIdAndIsDeletedFalse(Long id);
+
+    // Every status: the organiser's dashboard shows cancelled and completed
+    // events too. Tags batch-load via @BatchSize on Event.tags.
+    List<Event> findByOrganizerIdAndIsDeletedFalseOrderByEventDateAsc(Long organizerId);
 }

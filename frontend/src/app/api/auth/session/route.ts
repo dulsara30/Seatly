@@ -16,8 +16,8 @@ import type { User } from "@/types/entities/User";
 
 /**
  * "Who am I?" for the browser, which can't look at the httpOnly cookie
- * itself. Being logged out is a normal answer here — { user: null } with a
- * 200 — not an error, so anonymous visitors never produce a 401 just by
+ * itself. Being logged out is a normal answer here - { user: null } with a
+ * 200 - not an error, so anonymous visitors never produce a 401 just by
  * opening a public page.
  */
 export async function GET(request: NextRequest) {
