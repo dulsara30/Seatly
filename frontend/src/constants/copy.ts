@@ -52,6 +52,13 @@ export const Copy = {
 
   tag: (name: string) => `#${name}`,
 
+  live: {
+    connecting: "Connecting…",
+    live: "Live",
+    reconnecting: "Reconnecting — seats may be a moment behind",
+    unavailable: "Live updates unavailable",
+  },
+
   seats: {
     left: (available: number, limit: number) =>
       `${available} of ${limit} seats left`,

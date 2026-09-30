@@ -9,6 +9,7 @@ import { Avatar } from "@/components/atoms/Avatar";
 import { Badge } from "@/components/atoms/Badge";
 import { LinkButton } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
+import { LiveIndicator } from "@/components/atoms/LiveIndicator";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { TagChip } from "@/components/atoms/TagChip";
 import { EmptyState } from "@/components/molecules/EmptyState";
@@ -17,6 +18,7 @@ import { RsvpPanel } from "@/components/molecules/RsvpPanel";
 import { Copy } from "@/constants/copy";
 import { HttpStatus } from "@/constants/http";
 import { Routes, withReturnTo } from "@/constants/routes";
+import { useEventSeatStream } from "@/hooks/useEventSeatStream";
 import { useMyRsvpLookup } from "@/hooks/useMyRsvpLookup";
 import { ToastTone, useToastStore } from "@/store/toastStore";
 import { EventMode, RsvpStatus } from "@/types/entities/enums";
@@ -148,6 +150,8 @@ function RsvpSection({ event }: { event: EventDetailResponse }) {
   const createRsvp = useCreateRsvp();
   const cancelRsvp = useCancelRsvp();
   const showToast = useToastStore((state) => state.show);
+  // Opened only once the event has loaded — never a stream for a 404.
+  const seatStreamStatus = useEventSeatStream(event.id);
 
   // Until we know who's looking, any state shown would be a guess that flips.
   if (session.isPending || myRsvps.isLoading) {
@@ -182,6 +186,7 @@ function RsvpSection({ event }: { event: EventDetailResponse }) {
   return (
     <RsvpPanel
       state={state}
+      seatStatus={<LiveIndicator status={seatStreamStatus} />}
       availableSeats={event.availableSeats}
       seatLimit={event.seatLimit}
       mode={event.mode}

@@ -1,9 +1,11 @@
 import {
+  type InfiniteData,
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { ApiEndpoints } from "@/api/utils/ApiEndpoints";
 import { axiosInstance } from "@/api/utils/axiosInstance";
 import { unwrapMany, unwrapOne } from "@/api/utils/envelope";
@@ -22,6 +24,7 @@ import type {
   EventResponse,
 } from "@/types/responses/EventResponse";
 import type { PagedResponse } from "@/types/responses/PagedResponse";
+import type { SeatCountUpdate } from "@/types/responses/SeatCountUpdate";
 
 const fetchUpcomingEvents = async (
   params: EventListParams,
@@ -143,4 +146,48 @@ export const useUpdateEvent = () => {
       void queryClient.invalidateQueries({ queryKey: QueryKeys.rsvps.my });
     },
   });
+};
+
+/** The event with a live update's counts applied. seatLimit moves too when the organiser raised it. */
+function withSeatCounts<Event extends EventResponse>(event: Event, update: SeatCountUpdate): Event {
+  return {
+    ...event,
+    availableSeats: update.availableSeats,
+    seatLimit: update.availableSeats + update.confirmedCount,
+  };
+}
+
+/**
+ * Applies a pushed seat count to every cached copy of that event — its
+ * detail, every loaded browse page, the organiser's list — with setQueryData,
+ * never a refetch: the push already IS the new value, so asking the server
+ * again would be a wasted request per viewer per change.
+ *
+ * Returns a stable function, so the stream hook can hold on to it.
+ */
+export const useApplySeatUpdate = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(
+    (update: SeatCountUpdate) => {
+      const applyIfThisEvent = <Event extends EventResponse>(event: Event) =>
+        event.id === update.eventId ? withSeatCounts(event, update) : event;
+
+      // Each updater returns undefined when nothing is cached, which leaves it
+      // uncached — a push doesn't create data for a page nobody has opened.
+      queryClient.setQueryData<EventDetailResponse>(QueryKeys.events.detail(update.eventId), (event) =>
+        event ? withSeatCounts(event, update) : event,
+      );
+      queryClient.setQueriesData<InfiniteData<PagedResponse<EventResponse>>>(
+        { queryKey: QueryKeys.events.lists },
+        (data) =>
+          data && {
+            ...data,
+            pages: data.pages.map((page) => ({ ...page, items: page.items.map(applyIfThisEvent) })),
+          },
+      );
+      queryClient.setQueryData<EventResponse[]>(QueryKeys.events.mine, (events) => events?.map(applyIfThisEvent));
+    },
+    [queryClient],
+  );
 };

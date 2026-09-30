@@ -38,3 +38,11 @@ export const ApiEndpoints = {
     my: viaProxy(BackendPaths.rsvps.my),
   },
 } as const;
+
+/**
+ * EventSource is the browser's own client — it doesn't go through axios, so
+ * it needs the full same-origin URL, baseURL included. Through the proxy like
+ * everything else: no CORS, and the browser still never learns Spring's address.
+ */
+export const eventSeatStreamUrl = (eventId: Id) =>
+  `${API_BASE_PATH}${viaProxy(BackendPaths.events.stream(eventId))}`;

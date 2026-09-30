@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Button, LinkButton } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
 import { SeatBar } from "@/components/atoms/SeatBar";
@@ -12,6 +13,8 @@ type RsvpPanelProps = Pick<
   "availableSeats" | "seatLimit" | "mode" | "meetingLink"
 > & {
   state: RsvpPanelState;
+  /** Shown beside the seat bar — e.g. a live-updates indicator. A slot, so the panel knows nothing of streams. */
+  seatStatus?: ReactNode;
   signInHref: string;
   manageHref: string;
   isPending: boolean;
@@ -29,13 +32,17 @@ export function RsvpPanel({
   seatLimit,
   mode,
   meetingLink,
+  seatStatus,
   ...actions
 }: RsvpPanelProps) {
   const isFull = seatStateOf(availableSeats, seatLimit) === SeatState.FULL;
 
   return (
     <aside className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-5">
-      <SeatBar availableSeats={availableSeats} seatLimit={seatLimit} />
+      <div className="flex flex-col gap-2">
+        <SeatBar availableSeats={availableSeats} seatLimit={seatLimit} />
+        {seatStatus}
+      </div>
       <PanelAction state={state} isFull={isFull} {...actions} />
       {mode === EventMode.ONLINE && (
         <MeetingLinkRow meetingLink={meetingLink} />
@@ -46,7 +53,7 @@ export function RsvpPanel({
 
 type PanelActionProps = Omit<
   RsvpPanelProps,
-  "availableSeats" | "seatLimit" | "mode" | "meetingLink"
+  "availableSeats" | "seatLimit" | "mode" | "meetingLink" | "seatStatus"
 > & {
   isFull: boolean;
 };

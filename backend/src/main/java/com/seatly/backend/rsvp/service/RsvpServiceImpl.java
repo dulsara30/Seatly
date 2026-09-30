@@ -7,6 +7,7 @@ import com.seatly.backend.common.security.CurrentUser;
 import com.seatly.backend.common.util.SeatUtils;
 import com.seatly.backend.event.model.Event;
 import com.seatly.backend.event.repository.EventDao;
+import com.seatly.backend.event.service.SeatCountPublisher;
 import com.seatly.backend.event.type.EventMessageKey;
 import com.seatly.backend.event.type.EventStatus;
 import com.seatly.backend.rsvp.mapper.RsvpMapper;
@@ -45,6 +46,7 @@ public class RsvpServiceImpl implements RsvpService {
     private final UserDao userDao;
     private final RsvpMapper rsvpMapper;
     private final WaitlistManager waitlistManager;
+    private final SeatCountPublisher seatCountPublisher;
     private final CurrentUser currentUser;
 
     /**
@@ -82,7 +84,11 @@ public class RsvpServiceImpl implements RsvpService {
             rsvp.setPosition(nextWaitlistPosition(eventId));
         }
 
-        return rsvpMapper.toResponseDto(rsvpDao.save(rsvp));
+        Rsvp saved = rsvpDao.save(rsvp);
+        // Waitlisted too: the confirmed count doesn't move, but every viewer
+        // should still see an update rather than infer that nothing happened.
+        seatCountPublisher.publishChange(event);
+        return rsvpMapper.toResponseDto(saved);
     }
 
     /**
@@ -104,6 +110,7 @@ public class RsvpServiceImpl implements RsvpService {
         rsvp.setStatus(RsvpStatus.CANCELLED);
         rsvp.setPosition(null);
         waitlistManager.rebalance(event);
+        seatCountPublisher.publishChange(event);
 
         return rsvpMapper.toResponseDto(rsvp);
     }

@@ -2,6 +2,7 @@ package com.seatly.backend.rsvp.service;
 
 import com.seatly.backend.common.util.SeatUtils;
 import com.seatly.backend.event.model.Event;
+import com.seatly.backend.event.service.SeatCountPublisher;
 import com.seatly.backend.rsvp.model.Rsvp;
 import com.seatly.backend.rsvp.repository.RsvpDao;
 import com.seatly.backend.rsvp.type.RsvpStatus;
@@ -31,6 +32,7 @@ public class WaitlistManager {
     private static final int FIRST_POSITION = 1;
 
     private final RsvpDao rsvpDao;
+    private final SeatCountPublisher seatCountPublisher;
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void rebalance(Event lockedEvent) {
@@ -42,6 +44,13 @@ public class WaitlistManager {
         int promotions = Math.clamp(freeSeats, 0, queue.size());
         queue.subList(0, promotions).forEach(this::confirm);
         renumber(queue.subList(promotions, queue.size()));
+
+        // Announced here, not only by the callers, so any future caller of
+        // rebalance can't promote people silently. Today's callers announce
+        // too; the duplicate carries identical counts, so it's harmless.
+        if (promotions > 0) {
+            seatCountPublisher.publishChange(lockedEvent);
+        }
     }
 
     private void confirm(Rsvp rsvp) {
